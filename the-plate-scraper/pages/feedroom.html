@@ -52,6 +52,7 @@
 <script src="/app.js"></script>
 <script>
 TNS.init("feedroom");
+TNS.isOwner().then(ok => { if (!ok) TNS.lockMain("The Feed Room — our RSS reader and house-style rewriter — is an owner tool."); });
 let curFeed = null, curItem = null, lastRewrite = null;
 const D = document;
 
@@ -208,6 +209,7 @@ D.getElementById("af-add").onclick = async () => {
 };
 
 (async () => {
+  if (!(await TNS.isOwner())) return;
   await loadFeeds();
   const first = (await TNS.api("rss/feeds")).feeds[0];
   if (first) selectFeed(first.id);

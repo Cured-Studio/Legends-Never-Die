@@ -49,6 +49,7 @@
 <script src="/app.js"></script>
 <script>
 TNS.init("scraper");
+TNS.isOwner().then(ok => { if (!ok) TNS.lockMain("The Recipe Scraper is how new recipes get into the library — it lives in the owner's back office."); });
 let mode = "url", last = null;
 function setMode(m) {
   mode = m;

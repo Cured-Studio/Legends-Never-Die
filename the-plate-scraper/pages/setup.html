@@ -91,6 +91,7 @@ powershell -ExecutionPolicy Bypass -File .\setup-theplatescraper.ps1</pre>
 <script src="/app.js"></script>
 <script>
 TNS.init("");
+TNS.isOwner().then(ok => { if (!ok) TNS.lockMain("The MySQL Wizard manages the site's database — it's an owner tool."); });
 let status = null;
 
 function conn() {

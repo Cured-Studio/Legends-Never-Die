@@ -51,7 +51,7 @@ function render() {
     '<span class="chip">⏱ <b>' + R.time + " min</b></span>" +
     '<span class="chip">🔥 <b>' + TNS.esc(R.difficulty) + "</b></span>" +
     (R.rating ? '<span class="chip"><span class="starrating">★</span> <b>' + Number(R.rating).toFixed(1) + "</b> · " + R.reviews + " cook reports</span>" : '<span class="chip">✨ newly scraped</span>') +
-    (R.source ? '<span class="chip">🧲 scraped from ' + TNS.esc(R.source) + "</span>" : "") +
+    (R.source ? '<span class="chip">📖 adapted from ' + TNS.esc(R.source) + "</span>" : "") +
     "</div>" +
     "<h1>" + TNS.esc(R.title) + "</h1>" +
     "<p class='desc'>" + TNS.esc(R.description) + "</p>" +

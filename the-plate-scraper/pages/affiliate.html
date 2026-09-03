@@ -73,6 +73,13 @@ async function tab(t) {
   if (t === "overview") {
     const max = Math.max(...O.days.map(d => d.count), 1);
     $(
+      '<div class="panel" style="margin-bottom:16px"><h2 style="font-size:16px; margin-bottom:10px">Owner tools</h2>' +
+      '<div style="display:flex; gap:10px; flex-wrap:wrap">' +
+      '<a class="btn btn-dark btn-sm" href="/scraper.html">🧲 Recipe Scraper</a>' +
+      '<a class="btn btn-dark btn-sm" href="/feedroom.html">📡 Feed Room (RSS + rewriter)</a>' +
+      '<a class="btn btn-ghost btn-sm" href="/setup.html">🗄 MySQL Wizard</a>' +
+      '<a class="btn btn-ghost btn-sm" href="/blog.html">📖 Public blog (what readers see)</a>' +
+      "</div><p style='font-size:12.5px; color:var(--ink-faint); margin:10px 0 0'>Workflow: follow a blog in the Feed Room → rewrite the post in house style → publish → it lands on the public blog. Or scrape a recipe URL straight into the library.</p></div>" +
       '<div class="kpi-grid">' +
       kpi(O.clicks7 + " clicks", "last 7 days", "+ trending") +
       kpi(O.clicks14 + " clicks", "last 14 days") +

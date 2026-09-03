@@ -475,6 +475,20 @@ def seed_db() -> dict:
                   "<li>Warm the tortillas, pile on cabbage, fish, and crema, and eat immediately.</li></ol>"),
     ]
 
+    # Two posts the owner has already rewritten + published from the feeds,
+    # so the public blog has content from day one.
+    posts = []
+    for i, (feed, idx, days_ago) in enumerate(((feeds[1], 0, 6), (feeds[2], 1, 12))):
+        it = feed["items"][idx]
+        r = rewrite_post(it["title"], it["content"], feed["site"], it["author"], it["link"])
+        posts.append({
+            "id": "post-seed%d" % i, "title": r["newTitle"], "intro": r["intro"],
+            "body": r["body"], "houseNote": r["houseNote"], "signoff": r["signoff"],
+            "credit": r["credit"], "tags": r["tags"], "status": "published",
+            "sourceLink": r["sourceLink"], "author": "admin@theplatescraper.com",
+            "ts": time.time() - days_ago * 86400,
+        })
+
     return {
         "users": users,
         "sessions": {},
@@ -484,7 +498,7 @@ def seed_db() -> dict:
         "admin": {"email": "admin@theplatescraper.com", "name": "Site Owner",
                   "salt": "seeded-salt", "hash": hash_pw("plate-admin-2026", "seeded-salt")},
         "feeds": feeds,
-        "posts": [],
+        "posts": posts,
         "stats": {"scrapes_served": 1243, "rewrites": 212, "members": 1873},
     }
 
@@ -1039,6 +1053,16 @@ class Handler(BaseHTTPRequestHandler):
             "created": u["created"], "is_admin": u["email"] == db_admin_email(),
         }
 
+    def _is_owner(self):
+        tok = self._cookie("tps")
+        with LOCK:
+            db = load_db()
+        sess = db["sessions"].get(tok, "")
+        if sess.startswith("ADMIN:"):
+            return True
+        u = self._db_user(db)
+        return bool(u and u["email"] == db_admin_email())
+
     def _404(self):
         self._json({"ok": False, "error": "Not found"}, 404)
 
@@ -1123,6 +1147,36 @@ class Handler(BaseHTTPRequestHandler):
     def _api(self, method, path, q):
         p = path[len("/api/"):]
         b = self._body_json() if method == "POST" else {}
+
+        # --- owner check + owner-only tooling (scraper, feed room, wizard) ---
+        if p == "owner" and method == "GET":
+            return self._json({"ok": True, "owner": self._is_owner()})
+        if p == "scrape" or p == "scrape/save" or p.startswith("rss/"):
+            if not self._is_owner():
+                return self._json({"ok": False, "error": "Owner tools — sign in with the site owner account."}, 401)
+        if p.startswith("setup/") and p not in ("setup/status", "setup/schema"):
+            if not self._is_owner():
+                return self._json({"ok": False, "error": "Owner tools — sign in with the site owner account."}, 401)
+
+        # --- public blog (posts the owner publishes from the Feed Room) ---
+        if p == "blog" and method == "GET":
+            with LOCK:
+                db = load_db()
+            posts = [x for x in db.get("posts", []) if x.get("status") == "published"]
+            posts.sort(key=lambda x: x.get("ts", 0), reverse=True)
+            self._json({"ok": True, "posts": posts})
+            return
+
+        m = re.fullmatch(r"blog/([\w-]+)", p)
+        if m and method == "GET":
+            with LOCK:
+                db = load_db()
+            post = next((x for x in db.get("posts", [])
+                         if x["id"] == m.group(1) and x.get("status") == "published"), None)
+            if not post:
+                return self._404()
+            self._json({"ok": True, "post": post})
+            return
 
         # --- auth ---
         if p == "register" and method == "POST":
@@ -1728,15 +1782,7 @@ class Handler(BaseHTTPRequestHandler):
                        headers={"Content-Disposition": "attachment; filename=theplatescraper-schema.sql"})
             return
 
-        def _setup_authorized():
-            tok = self._cookie("tps")
-            with LOCK:
-                db = load_db()
-            return (db["sessions"].get(tok, "") or "").startswith("ADMIN:")
-
         if p in ("setup/test", "setup/create", "setup/migrate", "setup/activate", "setup/deactivate") and method == "POST":
-            if p != "setup/test" and not _setup_authorized():
-                return self._json({"ok": False, "error": "Control panel access required."}, 401)
             cfg = {
                 "host": (b.get("host") or "127.0.0.1").strip(),
                 "port": int(b.get("port") or 3306),

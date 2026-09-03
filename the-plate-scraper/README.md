@@ -1,18 +1,28 @@
 # The Plate Scraper — theplatescraper.com
 
-A complete, independent home-cooking platform. Runs on **plain Python (standard library only)** — no frameworks, no build step. Optional **MySQL** backend with a visual wizard + one-command Windows setup.
+A complete, independent **recipe site** for cooks — with a private back office (recipe scraper, RSS reader + house-style rewriter, affiliate panel, MySQL wizard) for the site owner. Runs on **plain Python (standard library only)** — no frameworks, no build step. Optional **MySQL** backend with a visual wizard + one-command Windows setup.
 
-## The tools
+## Reader-facing site
 
 | Tool | Where | What it does |
 |---|---|---|
-| 🧲 **Recipe Scraper** | `/scraper.html` | Paste a recipe URL (or raw HTML/plain text) → clean, editable recipe card. JSON-LD `Recipe` schema, `<ul>/<ol>` blocks, and plain-text sections are all understood. Save to your library, scale, send to the list. |
-| 📡 **Feed Room (RSS)** | `/feedroom.html` | Follow recipe blogs' RSS/Atom feeds, read new posts, then **Rewrite in house style** — new title, intro, synonym-passed body, house note, full source credit. Save as draft/published post, or pull the recipe straight into the library. |
-| 🔁 **Substitution Guide** | `/substitutions.html` | 26 pantry staples with exact ratios and honest notes. Linked from every ingredient on every recipe ("swap ↗"). |
+| 📖 **Recipe Library** | `/recipes.html` | Tested original recipes, search by name/ingredient, category filters, one-tap serving scale, "swap ↗" links per ingredient. |
+| 📖 **Blog** | `/blog.html` | Published posts — including recipes adapted from the blogs we follow, always with source credit. Fed by the Feed Room rewriter. |
+| 🔁 **Substitution Guide** | `/substitutions.html` | 26 pantry staples with exact ratios and honest notes. Linked from every ingredient on every recipe. |
 | 🛒 **Shopping List** | `/shopping.html` | Aisle-grouped, quantities merged, tap-to-check. Guest list lives in the browser; members' lists sync server-side. |
-| 👩‍🍳 **Members Area** | `/dashboard.html` | Sign up / sign in (PBKDF2 + salted sessions), saved recipes, scrape history, rewritten-post queue, tier upgrades (demo checkout). |
-| 🎛 **Affiliate Control Panel** | `/affiliate.html` | Owner dashboard: stores CRUD, products CRUD (auto-generates `/go/CODE` tracked links), 14-day click charts, per-link estimated commission, live click feed. Public shop at `/gear.html`. Clicks are logged server-side on `/go/CODE` redirects. |
+| 👩‍🍳 **Members Area** | `/dashboard.html` | Sign up / sign in (PBKDF2 + salted sessions), saved recipes, synced lists, tier upgrades (demo checkout). |
+| 🍳 **Kitchen Gear** | `/gear.html` | Public affiliate shop — tracked links. |
+
+## Owner back office (requires the owner account)
+
+| Tool | Where | What it does |
+|---|---|---|
+| 🧲 **Recipe Scraper** | `/scraper.html` | Paste a recipe URL (or raw HTML/plain text) → clean, editable recipe card (JSON-LD `Recipe` schema, `<ul>/<ol>` blocks, plain text). Save into the library, scale, send to the list. |
+| 📡 **Feed Room (RSS)** | `/feedroom.html` | Follow recipe blogs' RSS/Atom feeds, read new posts, **Rewrite in house style** — new title, intro, synonym-passed body, house note, full source credit. Publish → appears on the public blog. Or pull the recipe straight into the library. |
+| 🎛 **Affiliate Control Panel** | `/affiliate.html` | Stores & products CRUD (auto-generates `/go/CODE` tracked links), 14-day click charts, per-link estimated commission, live click feed. Clicks logged server-side on `/go/CODE` redirects. |
 | 🗄 **MySQL Wizard** | `/setup.html` | 5-step wizard: status → connect → create DB + schema → migrate JSON data → activate. JSON file always stays as a hot backup; if MySQL ever drops, the server falls back to JSON automatically. |
+
+Owner account: `admin@theplatescraper.com` — works either as a signed-in member or via the control-panel login; both unlock the owner tools.
 
 ## Quick start
 

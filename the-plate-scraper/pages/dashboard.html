@@ -45,8 +45,10 @@ TNS.init("");
     '<div class="field" style="margin-top:14px"><label>Display name</label><input type="text" id="pn" value="' + TNS.esc(me.name) + '"></div>' +
     '<button class="btn btn-dark btn-sm" id="b-pn">Save profile</button>' +
     '<div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap">' +
-    (me.is_admin ? '<a class="btn btn-ghost btn-sm" href="/affiliate.html">🎛 Affiliate Control Panel</a>' : "") +
-    '<a class="btn btn-ghost btn-sm" href="/setup.html">🗄 MySQL Wizard</a>' +
+    (me.is_admin ? '<a class="btn btn-ghost btn-sm" href="/affiliate.html">🎛 Control Panel</a>' +
+    '<a class="btn btn-ghost btn-sm" href="/scraper.html">🧲 Scraper</a>' +
+    '<a class="btn btn-ghost btn-sm" href="/feedroom.html">📡 Feed Room</a>' +
+    '<a class="btn btn-ghost btn-sm" href="/setup.html">🗄 MySQL Wizard</a>' : "") +
     '<button class="btn btn-ghost btn-sm" id="b-out">Sign out</button></div></div>' +
     '<div class="sidebox" style="margin-top:16px"><h3>Membership</h3>' +
     '<div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:12px">You\'re on <b>' + tierLabel + "</b>." +
@@ -55,11 +57,11 @@ TNS.init("");
     (me.tier !== "legend" ? '<button class="btn btn-dark btn-sm" data-tier="legend" id="b-leg" style="margin-top:8px">👑 Go Legend — $19/mo</button>' : "") +
     "<p style='font-size:11.5px; color:var(--ink-faint); margin:10px 0 0'>Demo checkout — no card charged.</p></div>" +
     "</div><div>" +
-    '<div class="panel" style="margin-bottom:20px"><h2 style="font-size:20px; margin-bottom:12px">📡 Rewritten posts (Feed Room)</h2>' +
+    (me.is_admin ? '<div class="panel" style="margin-bottom:20px"><h2 style="font-size:20px; margin-bottom:12px">📡 Rewritten posts (Feed Room)</h2>' +
     (posts.length ? posts.map(p => '<div class="recents"><div class="r"><span>' + TNS.esc(p.title) + '</span><span class="d">' +
       (p.status === "published" ? "🚀 published · " : "📝 draft · ") + TNS.timeAgo(p.ts) + "</span></div></div>").join("")
     : '<p style="font-size:13.5px; color:var(--ink-faint); margin:0">No rewritten posts yet — try the <a href="/feedroom.html">Feed Room</a> and hit “Rewrite in house style.”</p>') +
-    "</div>" +
+    "</div>" : "") +
     '<div class="panel"><h2 style="font-size:20px; margin-bottom:4px">❤️ Saved recipes</h2>' +
     (saved.length ? '<div class="recipe-grid" style="margin-top:14px">' + saved.map(r => TNS.recipeCard({ ...r, savedByMe: true })).join("") + "</div>"
     : '<p style="font-size:13.5px; color:var(--ink-faint); margin:8px 0 0">Nothing saved yet — tap the 🤍 on any recipe card.</p>') +

@@ -48,7 +48,26 @@
   TNS.signOut = async function () {
     try { await TNS.api("logout"); } catch (e) {}
     TNS.me = null;
+    TNS.owner = false;
     location.href = "/";
+  };
+
+  TNS.owner = false;
+  TNS.isOwner = async function () {
+    if (TNS.owner == null) try { TNS.owner = (await TNS.api("owner")).owner; } catch (e) {}
+    return TNS.owner;
+  };
+
+  TNS.lockMain = function (sub) {
+    const main = document.querySelector("main");
+    if (!main) return;
+    main.innerHTML = '<div class="wrap" style="padding-top:70px"><div class="auth-card" style="max-width:520px">' +
+      '<h1 style="font-size:26px">🔒 Owner tools</h1>' +
+      '<p class="sub">' + (sub || "This area is part of the site owner's back office.") +
+      ' Sign in with the owner account to continue.</p>' +
+      '<a class="btn btn-dark" style="width:100%" href="/affiliate.html">Control panel login →</a>' +
+      '<p style="font-size:12.5px;color:var(--ink-faint);margin-top:14px">Here for dinner instead? <a href="/recipes.html">The recipes</a> are the good part.</p>' +
+      "</div></div>";
   };
 
   /* ---------- nav / footer ---------- */
@@ -57,16 +76,19 @@
     if (!el) return;
     const links = [
       ["recipes.html", "Recipes", "recipes"],
-      ["scraper.html", "Scraper", "scraper"],
-      ["feedroom.html", "Feed Room", "feedroom"],
+      ["blog.html", "Blog", "blog"],
       ["substitutions.html", "Substitutions", "subs"],
       ["shopping.html", "Shopping List", "shopping"],
       ["gear.html", "Kitchen Gear", "gear"],
     ];
     const me = await TNS.loadMe();
+    const owner = await TNS.isOwner();
+    const toolLinks = owner
+      ? ' <a href="/scraper.html" title="Owner tool">🧲</a><a href="/feedroom.html" title="Owner tool">📡</a>'
+      : "";
     const authHtml = me
       ? '<span class="who">Hi, <b>' + esc(me.name.split(" ")[0]) + "</b></span>" +
-        (me.is_admin ? '<a class="btn btn-ghost btn-sm" href="/affiliate.html">Control Panel</a>' : "") +
+        (owner ? '<a class="btn btn-ghost btn-sm" href="/affiliate.html">Control Panel</a>' : "") +
         '<a class="btn btn-dark btn-sm" href="/dashboard.html">My Kitchen</a>'
       : '<a class="btn btn-ghost btn-sm" href="/members.html">Sign in</a>' +
         '<a class="btn btn-primary btn-sm" href="/members.html?tab=join">Join free</a>';
@@ -76,6 +98,7 @@
       '<span>The Plate Scraper<small>theplatescraper.com</small></span></a>' +
       '<nav class="navlinks">' +
       links.map(l => '<a href="/' + l[0] + '"' + (l[2] === active ? ' class="active"' : "") + ">" + l[1] + "</a>").join("") +
+      toolLinks +
       "</nav>" +
       '<div class="navauth">' + authHtml + "</div></div>";
   };
@@ -86,14 +109,14 @@
     el.innerHTML = '<div class="wrap"><div class="cols">' +
       "<div><h4>The Plate Scraper</h4><p style='font-size:14px;color:var(--ink-soft);margin:0 0 10px'>An independent home-cooking platform for theplatescraper.com. Scrape the web's best recipes, swap what you have, and cook like a legend.</p>" +
       '<div class="pillrow"><span class="pill">Est. 2026</span><span class="pill">Seattle, WA</span></div></div>' +
-      "<div><h4>Tools</h4><ul>" +
-      '<li><a href="/scraper.html">Recipe Scraper</a></li><li><a href="/feedroom.html">Feed Room (RSS)</a></li>' +
-      '<li><a href="/substitutions.html">Substitution Guide</a></li><li><a href="/shopping.html">Shopping List</a></li></ul></div>' +
+      "<div><h4>Cooking</h4><ul>" +
+      '<li><a href="/substitutions.html">Substitution Guide</a></li><li><a href="/shopping.html">Shopping List</a></li>' +
+      '<li><a href="/gear.html">Kitchen Gear</a></li><li><a href="/blog.html">From the Blog</a></li></ul></div>' +
       "<div><h4>Explore</h4><ul>" +
-      '<li><a href="/recipes.html">All Recipes</a></li><li><a href="/gear.html">Kitchen Gear</a></li>' +
-      '<li><a href="/members.html">Membership</a></li><li><a href="/about.html">About</a></li></ul></div>' +
+      '<li><a href="/recipes.html">All Recipes</a></li><li><a href="/recipes.html?category=Quick %26 Easy">Quick &amp; Easy</a></li>' +
+      '<li><a href="/recipes.html?category=Vegetarian">Vegetarian</a></li><li><a href="/about.html">About</a></li></ul></div>' +
       "<div><h4>Site</h4><ul>" +
-      '<li><a href="/affiliate.html">Affiliate Control Panel</a></li><li><a href="/dashboard.html">Members Area</a></li>' +
+      '<li><a href="/members.html">Membership</a></li><li><a href="/dashboard.html">Members Area</a></li>' +
       '<li><a href="mailto:hello@theplatescraper.com">hello@theplatescraper.com</a></li></ul></div>' +
       '</div><div class="fine">© 2026 The Plate Scraper · Independent platform — not affiliated with any recipe site named elsewhere on the internet. Some gear links are affiliate links; we may earn a commission that keeps the pot on the stove. All recipes are original to our kitchen.</div></div>';
   };
@@ -196,7 +219,7 @@
       : '<div class="noimg">🍲</div>';
     const stars = r.rating ? '★ ' + Number(r.rating).toFixed(1) + " (" + r.reviews + ")" : "new";
     return '<article class="recipe-card">' +
-      (r.custom ? '<span class="scraped-badge">Scraped</span>' : "") +
+      (r.custom ? '<span class="scraped-badge">New</span>' : "") +
       '<button class="heart' + (r.savedByMe ? " on" : "") + '" data-slug="' + r.slug + '" title="Save to my recipes">' + (r.savedByMe ? "❤️" : "🤍") + "</button>" +
       '<a class="thumb" href="/recipe/' + r.slug + '"><span class="cat">' + esc(r.category) + "</span>" + img + "</a>" +
       '<div class="body"><h3><a href="/recipe/' + r.slug + '">' + esc(r.title) + "</a></h3>" +
