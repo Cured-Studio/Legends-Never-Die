@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipe Scraper — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:34px">
+    <h1 style="font-size:36px; margin:0 0 6px">🧲 The Recipe Scraper</h1>
+    <p style="color:var(--ink-soft); margin:0 0 22px">Give us a recipe URL (or paste the page's HTML/text) and we pull the ingredients, steps, and timings into a clean card you own. Save it to your library, scale it, and send it to your shopping list.</p>
+
+    <div class="tool-grid">
+      <div class="panel">
+        <div class="tabs">
+          <button id="tab-url" class="on" onclick="setMode('url')">🔗 Paste a URL</button>
+          <button id="tab-paste" onclick="setMode('paste')">📋 Paste HTML / text</button>
+        </div>
+        <div class="field hidden" id="fld-url"><label>Recipe URL</label>
+          <input type="url" id="f-url" placeholder="https://any-food-blog.com/my-best-rosé-garlic-chicken">
+        </div>
+        <div class="field hidden" id="fld-paste"><label>Recipe HTML or plain text</label>
+          <textarea id="f-html" class="mono" placeholder="Ctrl-A, Ctrl-C on the recipe page, paste here. Works with raw HTML, or plain text with an Ingredients section…"></textarea>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Title (optional override)</label><input type="text" id="f-title" placeholder="auto-detected"></div>
+          <div class="field"><label>Servings (optional)</label><input type="number" id="f-serv" min="1" max="24" placeholder="auto"></div>
+        </div>
+        <button class="btn btn-primary" id="btn-scrape" onclick="scrape()">🧲 Scrape this recipe</button>
+        <div class="banner warn" id="b-warn"></div>
+        <div class="banner err" id="b-err"></div>
+      </div>
+
+      <div class="panel preview">
+        <div class="parse-head"><h2>Parsed result</h2><span class="src-tag" id="src-tag"></span></div>
+        <div id="result" class="result-empty"><div class="big">🥣</div>
+          <p>Your scraped recipe will land here — editable, saveable, list-ready.</p>
+          <button class="btn btn-ghost btn-sm" onclick="loadSample()">Try a sample first</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("scraper");
+let mode = "url", last = null;
+function setMode(m) {
+  mode = m;
+  document.getElementById("tab-url").classList.toggle("on", m === "url");
+  document.getElementById("tab-paste").classList.toggle("on", m === "paste");
+  document.getElementById("fld-url").classList.toggle("hidden", m !== "url");
+  document.getElementById("fld-paste").classList.toggle("hidden", m !== "paste");
+}
+function hideBanners() {
+  ["b-warn", "b-err"].forEach(id => document.getElementById(id).classList.remove("show"));
+}
+async function scrape() {
+  hideBanners();
+  const btn = document.getElementById("btn-scrape");
+  btn.disabled = true; btn.textContent = "Scraping…";
+  const body = { mode: mode };
+  if (mode === "url") body.url = document.getElementById("f-url").value.trim();
+  else body.html = document.getElementById("f-html").value;
+  const t = document.getElementById("f-title").value.trim(); if (t) body.title = t;
+  const s = document.getElementById("f-serv").value; if (s) body.servings = +s;
+  try {
+    const d = await TNS.api("scrape", { body });
+    if (d.warnings && d.warnings.length) {
+      const w = document.getElementById("b-warn"); w.innerHTML = "ℹ️ " + d.warnings.map(TNS.esc).join("<br>ℹ️ "); w.classList.add("show");
+    }
+    render(d.recipe);
+  } catch (e) {
+    const b = document.getElementById("b-err"); b.textContent = e.message; b.classList.add("show");
+  }
+  btn.disabled = false; btn.textContent = "🧲 Scrape this recipe";
+}
+function render(r) {
+  last = r;
+  const el = document.getElementById("result");
+  el.className = "";
+  document.getElementById("src-tag").textContent = (r.source || "") + (r.url ? " · " + TNS.esc(r.url).slice(0, 44) : "");
+  el.innerHTML =
+    '<div class="kv"><span>Servings: <b contenteditable data-k="servings">' + (r.servings || "?") + "</b></span>" +
+    (r.cookTime ? '<span>Cook time: <b contenteditable data-k="cookTime">' + r.cookTime + " min</b></span>" : "") +
+    (r.author ? '<span>Author: <b>' + TNS.esc(r.author) + "</b></span>" : "") + "</div>" +
+    '<h3>Title <small style="color:var(--ink-faint); font-weight:400">(click to edit)</small></h3>' +
+    '<input type="text" data-k="title" value="' + TNS.esc(r.title) + '" style="font-size:17px; font-weight:700">' +
+    '<h3>Ingredients (' + r.ingredients.length + ')</h3><ul class="ings">' +
+    r.ingredients.map((i, idx) => '<li><input type="text" data-idx="' + idx + '" value="' + TNS.esc((i.qty ? i.qty + " " + (i.unit || "") : "") + " " + i.item) + '" style="border:none; background:transparent; font-size:14.5px; padding:2px 4px"></li>').join("") +
+    "</ul>" +
+    '<h3>Steps (' + r.steps.length + ')</h3><ol class="steps">' +
+    r.steps.map((s, idx) => '<li><span contenteditable data-step="' + idx + '">' + TNS.esc(s) + "</span></li>").join("") +
+    "</ol>" +
+    '<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:18px">' +
+    '<button class="btn btn-primary btn-sm" id="b-save">💾 Save to my library</button>' +
+    '<button class="btn btn-sage btn-sm" id="b-list">🛒 All to shopping list</button>' +
+    '<button class="btn btn-ghost btn-sm" id="b-copy">⧉ Copy as text</button></div>';
+  el.querySelector("#b-save").onclick = save;
+  el.querySelector("#b-list").onclick = sendList;
+  el.querySelector("#b-copy").onclick = copyText;
+}
+function collect() {
+  if (!last) return null;
+  const r = JSON.parse(JSON.stringify(last));
+  const t = document.querySelector('[data-k="title"]'); if (t) r.title = t.value;
+  const sv = document.querySelector('[data-k="servings"]'); if (sv) r.servings = parseInt(sv.textContent) || r.servings || 4;
+  const ct = document.querySelector('[data-k="cookTime"]'); if (ct) r.cookTime = parseInt(ct.textContent) || null;
+  r.ingredients = [];
+  document.querySelectorAll('input[data-idx]').forEach(inp => {
+    const v = inp.value.trim(); if (v) r.ingredients.push(v);
+  });
+  r.steps = [];
+  document.querySelectorAll('[data-step]').forEach(sp => { const v = sp.textContent.trim(); if (v) r.steps.push(v); });
+  return r;
+}
+async function save() {
+  const r = collect();
+  if (!r) return;
+  if (!TNS.requireLogin("Sign in to save scraped recipes to your kitchen.")) return;
+  try {
+    const d = await TNS.api("scrape/save", { body: { ...r, source: last.source, url: last.url, author: last.author, notes: r.description } });
+    TNS.toast("Saved! It's in your members area now.", "ok");
+    setTimeout(() => location.href = "/recipe/" + d.slug, 650);
+  } catch (e) { TNS.toast(e.message, "err"); }
+}
+async function sendList() {
+  const r = collect();
+  if (!r) return;
+  if (!TNS.requireLogin("Sign in to sync your shopping list.")) return;
+  const items = r.ingredients.map(line => {
+    const m = line.match(/^([\d./ ]+(?:\d\/\d)?)\s*(cup|cups|tbsp|tsp|oz|lb|lbs|g|kg|ml|each|cloves?|can|cans|slice|pinch)?\s*(.*)$/i);
+    return m ? { item: m[3].trim(), qty: m[1] ? m[1].trim() : "", unit: m[2] || "" } : { item: line };
+  }).filter(i => i.item);
+  try { await TNS.addToList(items, r.title); TNS.toast(items.length + " items → shopping list 🛒", "ok"); }
+  catch (e) { TNS.toast(e.message, "err"); }
+}
+function copyText() {
+  const r = collect(); if (!r) return;
+  const txt = r.title + "\n" + (r.servings ? "Serves " + r.servings + "\n" : "") +
+    "\nINGREDIENTS\n" + r.ingredients.map(i => "• " + i).join("\n") +
+    "\n\nINSTRUCTIONS\n" + r.steps.map((s, i) => (i + 1) + ". " + s).join("\n") +
+    "\n\n— via The Plate Scraper (theplatescraper.com)";
+  navigator.clipboard.writeText(txt).then(() => TNS.toast("Copied to clipboard ⧉", "ok"));
+}
+function loadSample() {
+  document.getElementById("f-html").value =
+    "Weeknight Rosemary Sourdough Pot Roast\nServes 4\n\nIngredients\n2 lbs beef chuck roast\n2 tbsp olive oil\n1 onion, diced\n3 carrots, chunked\n2 cups beef broth\n2 tbsp tomato paste\n2 fresh rosemary sprigs\n1 tbsp honey\nSalt and pepper\n\nInstructions\nPat the beef dry and season it well.\nSear in a hot Dutch oven until browned on all sides.\nAdd onion and carrots, soften for 4 minutes.\nPour in broth and tomato paste, nestle the rosemary in.\nCover and braise at 325F for 3 hours.\nRest 10 minutes, slice, and drizzle with the honey.";
+  setMode("paste");
+  TNS.toast("Sample pasted — hit Scrape", "ok");
+}
+setMode("url");
+</script>
+</body>
+</html>

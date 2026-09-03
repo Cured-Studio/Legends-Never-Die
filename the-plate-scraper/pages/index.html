@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Plate Scraper — Scrape the web's best recipes, cook like a legend</title>
+<meta name="description" content="The Plate Scraper is a home-cooking platform for theplatescraper.com: scrape any recipe, swap ingredients, build a shopping list, and cook with confidence.">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <span class="kicker">🍳 The Platescraper · theplatescraper.com</span>
+          <h1>Scrape the web's best recipes.<br><em>Cook like a legend.</em></h1>
+          <p class="lead">Paste any recipe URL and our scraper turns it into a clean, cookable card. Scale it to your headcount, swap what's missing from your pantry, and send every ingredient straight to your shopping list.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="/scraper.html">🧲 Scrape a recipe now</a>
+            <a class="btn btn-ghost" href="/recipes.html">Browse the library →</a>
+          </div>
+        </div>
+        <div class="hero-img">
+          <div class="frame"><img src="/images/hero.jpg" alt="A warm table of homemade food" onerror="this.style.display='none'"></div>
+          <div class="float-card"><span class="dot">🧲</span><div><b>Scraper ready</b><span>any URL → your recipe card</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="statstrip">
+      <div class="stat"><b data-stat="recipes">8</b><span>recipes in the library</span></div>
+      <div class="stat"><b>26</b><span>pantry substitutions</span></div>
+      <div class="stat"><b>1,243</b><span>recipes scraped by members</span></div>
+      <div class="stat"><b>1,873</b><span>home cooks in the kitchen</span></div>
+    </div>
+  </div>
+
+  <section class="block" style="background:var(--bg-soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+    <div class="wrap">
+      <div class="section-head"><div><h2>How it works</h2><div class="sub">Three steps from “saw this online” to dinner on the table.</div></div></div>
+      <div class="how-grid">
+        <div class="how-card"><div class="num">STEP 01</div><h3>🧲 Scrape</h3><p>Drop a recipe URL into the Scraper (or paste the page). We pull the ingredients, steps, and timings into a clean card you own — save it to your members area in one click.</p></div>
+        <div class="how-card"><div class="num">STEP 02</div><h3> Swap</h3><p>Out of butter? Curious about a dairy-free route? The Substitution Guide covers 26 staples with exact ratios, so you cook with what's actually in your kitchen.</p></div>
+        <div class="how-card"><div class="num">STEP 03</div><h3>🛒 Cook</h3><p>Scale servings to your table, add the whole ingredient list to your shopping list (grouped by aisle), and hit the stove. One pot, zero stress.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <div><h2>From the library</h2><div class="sub">Original recipes written and tested in our kitchen — plus anything you scrape lands here too.</div></div>
+        <a class="link" href="/recipes.html">See all recipes →</a>
+      </div>
+      <div class="recipe-grid" id="featured"><div class="empty-plate"><div class="big">🍜</div>Loading the week's best…</div></div>
+    </div>
+  </section>
+
+  <section class="block" style="background:var(--sage-soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Pick a lane</h2><div class="sub">Cook by category, or dive straight into a tool.</div></div></div>
+      <div class="cat-grid" id="cats"></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-top:22px">
+        <a class="cat-tile" style="background:var(--ink)" href="/feedroom.html">📡 Feed Room<span>RSS reader + house-style rewriter</span></a>
+        <a class="cat-tile" style="background:var(--plum)" href="/shopping.html">🛒 Shopping List<span>Aisle-grouped, tap-to-check</span></a>
+        <a class="cat-tile" style="background:var(--gold); color:#4a3208" href="/gear.html">🍳 Kitchen Gear<span>The tools behind the recipes</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap" style="text-align:center; max-width:640px">
+      <h2 style="font-size:32px">Your kitchen, upgraded.</h2>
+      <p style="color:var(--ink-soft)">Free forever for the basics. Go Premium for unlimited saved recipes and list sync across devices, or Legend for the whole arsenal including the Feed Room rewriter.</p>
+      <div class="cta-row" style="justify-content:center">
+        <a class="btn btn-primary" href="/members.html?tab=join">Create a free account</a>
+        <a class="btn btn-ghost" href="/about.html">Why “Plate Scraper”? →</a>
+      </div>
+    </div>
+  </section>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("");
+(async () => {
+  try {
+    const d = await TNS.api("recipes?sort=popular");
+    document.getElementById("featured").innerHTML = d.recipes.slice(0, 4).map(TNS.recipeCard).join("");
+    document.querySelector('[data-stat="recipes"]').textContent = d.recipes.length;
+  } catch (e) { document.getElementById("featured").innerHTML = '<div class="empty-plate"><div class="big">🍽</div>Couldn\'t load recipes.</div>'; }
+  const cats = await (async () => {
+    try { const d = await TNS.api("recipes"); const m = {}; d.recipes.forEach(r => m[r.category] = (m[r.category] || 0) + 1); return m; } catch (e) { return {}; }
+  })();
+  const colors = { "Dinner": "var(--terra)", "Comfort Food": "var(--plum)", "Seafood": "#3f6f8a", "Quick & Easy": "var(--sage)", "Pasta": "var(--gold)", "Vegetarian": "#5a7d4a" };
+  const emojis = { "Dinner": "🍗", "Comfort Food": "🍝", "Seafood": "🐟", "Quick & Easy": "⚡", "Pasta": "🍜", "Vegetarian": "🥦" };
+  document.getElementById("cats").innerHTML = Object.entries(cats).map(([c, n]) =>
+    '<a class="cat-tile" href="/recipes.html?category=' + encodeURIComponent(c) + '" style="background:' + (colors[c] || "var(--ink)") + '">' +
+    '<span class="bg">' + (emojis[c] || "🍴") + "</span>" + c + "<span>" + n + " recipes</span></a>").join("");
+})();
+</script>
+</body>
+</html>

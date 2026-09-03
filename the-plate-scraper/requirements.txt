@@ -1,0 +1,4 @@
+# The Plate Scraper — optional dependencies
+# The server itself runs on the Python standard library.
+# Install this to enable the MySQL backend + MySQL Wizard:
+pymysql>=1.1.0

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ingredient Substitutions — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:34px">
+    <h1 style="font-size:36px; margin:0 0 6px">🔁 The Substitution Guide</h1>
+    <p style="color:var(--ink-soft); margin:0 0 24px">Out of something? That's a pantry problem, not a cancelled dinner. Exact ratios, honest notes, no vague “use whatever you have.” Search, or follow the index.</p>
+    <input type="search" id="q" placeholder="Search an ingredient… try 'butter', 'eggs', 'soy sauce'" style="margin-bottom:24px; max-width:520px">
+    <div class="subs-layout">
+      <nav class="sub-index" id="index"></nav>
+      <div id="blocks"></div>
+    </div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("subs");
+let ALL = [];
+function render(filter) {
+  const f = (filter || "").toLowerCase();
+  const list = ALL.filter(s => !f || s.name.toLowerCase().includes(f) ||
+    s.subs.some(x => x.name.toLowerCase().includes(f)));
+  document.getElementById("blocks").innerHTML = list.map(s =>
+    '<div class="sub-block sub-card" id="' + s.id + '">' +
+    '<h3><span class="em">' + s.emoji + "</span> " + TNS.esc(s.name) + "</h3>" +
+    s.subs.map(x => '<div class="sub-row"><div><b>' + TNS.esc(x.name) + '</b><div class="ratio">' + TNS.esc(x.ratio) + "</div></div>" +
+    '<div>' + TNS.esc(x.note) + "</div></div>").join("") + "</div>").join("") ||
+    '<div class="empty-plate"><div class="big">🧂</div>Nothing in the index for that one — but salt, fat, acid, and heat fix most of it.</div>';
+  document.getElementById("index").innerHTML = list.map(s =>
+    '<a href="#' + s.id + '"><span class="em">' + s.emoji + "</span>" + TNS.esc(s.name) + "</a>").join("");
+}
+let t;
+document.getElementById("q").addEventListener("input", e => { clearTimeout(t); t = setTimeout(() => render(e.target.value), 200); });
+document.getElementById("index").addEventListener("click", e => {
+  const a = e.target.closest("a"); if (!a) return;
+  document.querySelectorAll("#index a").forEach(x => x.classList.remove("on"));
+  a.classList.add("on");
+});
+(async () => {
+  const d = await TNS.api("substitutions");
+  ALL = d.substitutions;
+  render("");
+  if (location.hash) {
+    const el = document.querySelector(location.hash);
+    if (el) setTimeout(() => el.scrollIntoView(), 60);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Membership — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap">
+    <div class="tier-grid" style="margin:34px 0 10px">
+      <div class="tier"><div class="tierbadge">Free</div>
+        <div class="price">$0 <small>forever</small></div>
+        <ul><li>Scrape unlimited recipes</li><li>Shopping list on this device</li><li>Substitution Guide &amp; full library</li></ul>
+        <a class="btn btn-ghost" href="#auth">Start free</a></div>
+      <div class="tier" style="border-color:var(--terra)"><span class="pop">Most popular</span>
+        <div class="tierbadge premium">Premium</div>
+        <div class="price">$9 <small>/ month</small></div>
+        <ul><li>Unlimited saved recipes</li><li>Shopping list synced everywhere</li><li>Scrape history &amp; your own library</li><li>Priority on new tools</li></ul>
+        <a class="btn btn-primary" href="#auth">Go Premium</a></div>
+      <div class="tier"><div class="tierbadge legend">Legend</div>
+        <div class="price">$19 <small>/ month</small></div>
+        <ul><li>Everything in Premium</li><li>Feed Room RSS reader + rewriter</li><li>Scraped posts queue</li><li>Name in the credits wall</li></ul>
+        <a class="btn btn-dark" href="#auth">Go Legend</a></div>
+    </div>
+    <p style="text-align:center; color:var(--ink-faint); font-size:12.5px; margin-bottom:26px">Demo checkout — upgrades are simulated, no card is charged.</p>
+
+    <div class="auth-card" id="auth">
+      <div class="tabs">
+        <button id="tab-in" class="on" onclick="setTab('in')">Sign in</button>
+        <button id="tab-j" onclick="setTab('join')">Create account</button>
+      </div>
+      <div id="form-in">
+        <div class="field"><label>Email</label><input type="email" id="in-email" value="demo@theplatescraper.com"></div>
+        <div class="field"><label>Password</label><input type="password" id="in-pass" value="demo1234"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="login()">Sign in →</button>
+        <p style="font-size:12px; color:var(--ink-faint); margin:14px 0 0">Demo member: <b>demo@theplatescraper.com / demo1234</b> ·<br>Site owner (control panel): <b>admin@theplatescraper.com / plate-admin-2026</b></p>
+      </div>
+      <div id="form-j" class="hidden">
+        <div class="field"><label>Name</label><input type="text" id="j-name" placeholder="What should we call you?"></div>
+        <div class="field"><label>Email</label><input type="email" id="j-email" placeholder="you@kitchen.com"></div>
+        <div class="field"><label>Password (6+ characters)</label><input type="password" id="j-pass"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="join()">Create my kitchen →</button>
+      </div>
+    </div>
+    <div style="height:60px"></div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("members");
+function setTab(t) {
+  document.getElementById("tab-in").classList.toggle("on", t === "in");
+  document.getElementById("tab-j").classList.toggle("on", t === "join");
+  document.getElementById("form-in").classList.toggle("hidden", t !== "in");
+  document.getElementById("form-j").classList.toggle("hidden", t !== "join");
+}
+if ((new URLSearchParams(location.search).get("tab")) === "join") setTab("join");
+async function login() {
+  try {
+    const d = await TNS.api("login", { body: { email: document.getElementById("in-email").value, password: document.getElementById("in-pass").value } });
+    TNS.toast("Welcome back, " + d.user.name.split(" ")[0] + " 👋", "ok");
+    setTimeout(() => location.href = "/dashboard.html", 500);
+  } catch (e) { TNS.toast(e.message, "err"); }
+}
+async function join() {
+  try {
+    const d = await TNS.api("register", { body: {
+      name: document.getElementById("j-name").value, email: document.getElementById("j-email").value, password: document.getElementById("j-pass").value,
+    }});
+    TNS.toast("Welcome to the kitchen, " + d.user.name.split(" ")[0] + " 🍳", "ok");
+    setTimeout(() => location.href = "/dashboard.html", 600);
+  } catch (e) { TNS.toast(e.message, "err"); }
+}
+</script>
+</body>
+</html>

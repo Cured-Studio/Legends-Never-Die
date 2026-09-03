@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feed Room — RSS Reader & Rewriter · The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:34px">
+    <h1 style="font-size:36px; margin:0 0 6px">📡 Feed Room</h1>
+    <p style="color:var(--ink-soft); margin:0 0 22px">Follow the recipe blogs you love. When a post lands, the house-style <b>rewriter</b> reworks it into <em>your</em> voice — new title, fresh intro, house note, full credit to the source — ready to save as a draft or turn into a library recipe.</p>
+
+    <div class="banner warn" id="b-warn"></div>
+
+    <div class="feedroom">
+      <div class="feedlist panel" style="padding:16px">
+        <h2 style="font-size:17px">Feeds</h2>
+        <div id="feeds"></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px; width:100%" id="b-addfeed">＋ Follow a feed</button>
+        <div id="addform" class="hidden" style="margin-top:10px">
+          <input type="text" id="af-name" placeholder="Feed name" style="margin-bottom:8px">
+          <input type="url" id="af-url" placeholder="https://blog.com/feed" style="margin-bottom:8px">
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-primary btn-sm" id="af-add">Add</button>
+            <button class="btn btn-ghost btn-sm" id="af-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel itemlist" style="padding:10px 6px; min-height:300px">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px">
+          <h2 style="font-size:17px; margin:0" id="feedtitle">Latest posts</h2>
+          <span style="display:flex; gap:8px">
+            <button class="btn btn-ghost btn-sm" id="b-check">⟳ Check for new</button>
+            <button class="btn btn-ghost btn-sm" id="b-readall">Mark all read</button>
+          </span>
+        </div>
+        <div id="items"><div class="result-empty"><div class="big">📭</div>Pick a feed on the left.</div></div>
+      </div>
+
+      <div class="panel detail" id="detail">
+        <div class="result-empty"><div class="big">🔁</div>Select a post to read it — then hit <b>Rewrite in house style</b>.</div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("feedroom");
+let curFeed = null, curItem = null, lastRewrite = null;
+const D = document;
+
+function feedColor(name) {
+  const cols = ["#c75b39", "#5f7a5a", "#7c4a6b", "#3f6f8a", "#b8862b", "#546a8a"];
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 997;
+  return cols[h % cols.length];
+}
+
+async function loadFeeds() {
+  const d = await TNS.api("rss/feeds");
+  D.getElementById("feeds").innerHTML = d.feeds.map(f =>
+    '<button class="feed' + (curFeed && curFeed.id === f.id ? " on" : "") + '" data-id="' + f.id + '">' +
+    '<span class="fmark" style="background:' + feedColor(f.name) + '">' + TNS.esc(f.name[0] || "?") + "</span>" +
+    "<span><b>" + TNS.esc(f.name) + "</b><span>" + f.count + " posts" + (f.unread ? " · " + f.unread + " new" : "") + "</span></span>" +
+    (f.unread ? '<span class="unread">' + f.unread + "</span>" : "") + "</button>").join("") ||
+    '<p style="font-size:13.5px; color:var(--ink-faint)">No feeds yet — add your first one.</p>';
+  D.getElementById("feeds").querySelectorAll(".feed").forEach(b => b.onclick = () => selectFeed(b.dataset.id, d.feeds));
+}
+async function selectFeed(id, list) {
+  curFeed = (list || (await TNS.api("rss/feeds")).feeds).find(f => f.id === id) ||
+            (await TNS.api("rss/feeds")).feeds.find(f => f.id === id);
+  await loadFeeds();
+  const d = await TNS.api("rss/feeds/" + id + "/items");
+  curItem = null;
+  D.getElementById("feedtitle").textContent = d.feed.name + " — latest";
+  D.getElementById("items").innerHTML = d.feed.items.map(i =>
+    '<button class="item" data-id="' + i.id + '"><div class="t">' + (i.read ? "" : '<span class="newdot"></span>') + TNS.esc(i.title) + "</div>" +
+    '<div class="m"><span>' + (i.author ? TNS.esc(i.author) + " · " : "") + TNS.timeAgo(i.ts) + "</span>" +
+    (i.recipe ? '<span class="rchip">recipe</span>' : "") + (i.rewritten ? '<span class="wchip">rewritten ✓</span>' : "") + "</div></button>").join("") ||
+    '<div class="result-empty"><div class="big">📭</div>Nothing here yet — hit “Check for new”.</div>';
+  D.getElementById("items").querySelectorAll(".item").forEach(b => b.onclick = () => selectItem(b.dataset.id));
+  D.getElementById("detail").innerHTML = '<div class="result-empty"><div class="big">🔁</div>Select a post to read it — then hit <b>Rewrite in house style</b>.</div>';
+  D.getElementById("b-check").onclick = () => checkFeed(id);
+  D.getElementById("b-readall").onclick = async () => { await TNS.api("rss/feeds/" + id + "/items/read", { body: { all: true } }); selectFeed(id); TNS.toast("All marked read", "ok"); };
+}
+async function checkFeed(id) {
+  const b = D.getElementById("b-check"); b.disabled = true; b.textContent = "Checking…";
+  const w = D.getElementById("b-warn"); w.classList.remove("show");
+  try {
+    const d = await TNS.api("rss/feeds/" + id + "/check", { body: {} });
+    if (d.warning) { w.textContent = "ℹ️ " + d.warning; w.classList.add("show"); }
+    TNS.toast(d.added ? d.added + " new post(s) pulled" : "Feed is up to date", "ok");
+    selectFeed(id);
+  } catch (e) { TNS.toast(e.message, "err"); }
+  b.disabled = false; b.textContent = "⟳ Check for new";
+}
+async function selectItem(id) {
+  const d = await TNS.api("rss/feeds/" + curFeed.id + "/items");
+  curItem = d.feed.items.find(i => i.id === id);
+  if (!curItem) return;
+  await TNS.api("rss/feeds/" + curFeed.id + "/items/" + id + "/read", { body: {} });
+  lastRewrite = null;
+  D.getElementById("items").querySelectorAll(".item").forEach(b => b.classList.toggle("on", b.dataset.id === id));
+  const det = D.getElementById("detail");
+  det.innerHTML =
+    "<h2 style='font-size:20px'>" + TNS.esc(curItem.title) + "</h2>" +
+    '<div class="kv"><span>' + (curItem.author ? TNS.esc(curItem.author) + " · " : "") + TNS.timeAgo(curItem.ts) + "</span>" +
+    (curItem.recipe ? '<span class="rchip" style="font-size:10.5px;font-weight:800;color:var(--sage);background:var(--sage-soft);border-radius:999px;padding:2px 8px;text-transform:uppercase">recipe detected</span>' : "") +
+    (curItem.link ? '<a href="' + TNS.esc(curItem.link) + '" target="_blank" rel="noopener nofollow">Original ↗</a>' : "") + "</div>" +
+    '<div class="original">' + curItem.content + "</div>" +
+    '<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px">' +
+    '<button class="btn btn-primary" id="b-rewrite">🔁 Rewrite in house style</button>' +
+    (curItem.recipe ? '<button class="btn btn-sage btn-sm" id="b-torecipe">🧲 Pull the recipe out</button>' : "") +
+    "</div>" +
+    '<div id="rewrite-out"></div>';
+  det.querySelector("#b-rewrite").onclick = rewrite;
+  const tr = det.querySelector("#b-torecipe");
+  if (tr) tr.onclick = async () => {
+    try {
+      const sc = await TNS.api("scrape", { body: { mode: "paste", html: curItem.content } });
+      if (TNS.requireLogin("Sign in to save recipes.")) {
+        const d2 = await TNS.api("scrape/save", { body: {
+          title: sc.recipe.title, ingredients: sc.recipe.ingredients, steps: sc.recipe.steps,
+          servings: sc.recipe.servings, cookTime: sc.recipe.cookTime, source: curFeed.site, url: curItem.link, author: curItem.author,
+        }});
+        TNS.toast("Recipe saved to your library 🧲", "ok");
+        setTimeout(() => location.href = "/recipe/" + d2.slug, 700);
+      }
+    } catch (e) { TNS.toast(e.message, "err"); }
+  };
+}
+async function rewrite() {
+  const b = D.getElementById("b-rewrite");
+  b.disabled = true; b.textContent = "Rewriting…";
+  try {
+    const d = await TNS.api("rss/rewrite", { body: {
+      title: curItem.title, content: curItem.content, site: curFeed.site,
+      author: curItem.author, link: curItem.link,
+    }});
+    lastRewrite = d.post;
+    const p = d.post;
+    D.getElementById("rewrite-out").innerHTML =
+      '<h3 style="margin-top:20px; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint)">— your version —</h3>' +
+      '<div class="rewritten">' +
+      '<h3 class="rt" contenteditable>' + TNS.esc(p.newTitle) + "</h3>" +
+      '<div class="credit">' + TNS.esc(p.credit) + " · engine: " + TNS.esc(d.engine) + "</div>" +
+      '<p contenteditable>' + TNS.esc(p.intro) + "</p>" +
+      p.body.map(x => '<p contenteditable>' + TNS.esc(x) + "</p>").join("") +
+      '<div class="hnote" contenteditable>' + TNS.esc(p.houseNote) + "</div>" +
+      '<div class="signoff">' + TNS.esc(p.signoff) + "</div>" +
+      (p.recipe ? '<div style="margin-top:12px"><span class="pill">🧲 ' + p.recipe.ingredients.length + ' ingredients + ' + p.recipe.steps.length + ' steps detected — save as a recipe too</span></div>' : "") +
+      "</div>" +
+      '<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px">' +
+      '<button class="btn btn-dark btn-sm" id="b-draft">📝 Save as draft</button>' +
+      '<button class="btn btn-sage btn-sm" id="b-pub">🚀 Save & mark published</button>' +
+      '<button class="btn btn-ghost btn-sm" id="b-resp">↻ Rewrite again (different flavor)</button>' +
+      "</div>";
+    const gather = () => {
+      const out = D.querySelector("#rewrite-out");
+      return {
+        title: out.querySelector(".rt").textContent.trim(),
+        intro: out.querySelectorAll(".rewritten > p")[0] ? out.querySelectorAll(".rewritten > p")[0].textContent.trim() : "",
+        body: [...out.querySelectorAll(".rewritten > p")].slice(1).map(x => x.textContent.trim()).filter(Boolean),
+        houseNote: out.querySelector(".hnote") ? out.querySelector(".hnote").textContent.trim() : "",
+        signoff: out.querySelector(".signoff") ? out.querySelector(".signoff").textContent.trim() : "",
+        credit: p.credit, tags: p.tags, sourceLink: curItem.link,
+      };
+    };
+    async function publish(status) {
+      const r = gather();
+      if (!TNS.requireLogin("Sign in to save rewritten posts.")) return;
+      try {
+        await TNS.api("rss/publish", { body: { ...r, status } });
+        curItem.rewritten = true;
+        TNS.toast(status === "published" ? "Published to your content queue 🚀" : "Saved as draft 📝", "ok");
+        selectFeed(curFeed.id);
+      } catch (e) { TNS.toast(e.message, "err"); }
+    }
+    D.querySelector("#b-draft").onclick = () => publish("draft");
+    D.querySelector("#b-pub").onclick = () => publish("published");
+    D.querySelector("#b-resp").onclick = rewrite;
+    TNS.toast("Rewritten in house style 🔁", "ok");
+  } catch (e) { TNS.toast(e.message, "err"); }
+  b.disabled = false; b.textContent = "🔁 Rewrite in house style";
+}
+
+D.getElementById("b-addfeed").onclick = () => {
+  const f = D.getElementById("addform"); f.classList.toggle("hidden");
+  if (!f.classList.contains("hidden") && !TNS.me) { TNS.requireLogin("Sign in to follow feeds."); f.classList.add("hidden"); }
+};
+D.getElementById("af-cancel").onclick = () => D.getElementById("addform").classList.add("hidden");
+D.getElementById("af-add").onclick = async () => {
+  const name = D.getElementById("af-name").value.trim();
+  const url = D.getElementById("af-url").value.trim();
+  if (!name || !url) return TNS.toast("Give the feed a name and a URL.", "err");
+  try {
+    await TNS.api("rss/feeds", { body: { name, url } });
+    TNS.toast("Following " + name + " 📡", "ok");
+    D.getElementById("addform").classList.add("hidden");
+    D.getElementById("af-name").value = ""; D.getElementById("af-url").value = "";
+    loadFeeds();
+  } catch (e) { TNS.toast(e.message, "err"); }
+};
+
+(async () => {
+  await loadFeeds();
+  const first = (await TNS.api("rss/feeds")).feeds[0];
+  if (first) selectFeed(first.id);
+})();
+</script>
+</body>
+</html>

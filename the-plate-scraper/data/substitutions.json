@@ -1,0 +1,220 @@
+[
+  {
+    "id": "butter", "name": "Butter", "emoji": "\ud83e\uddc8",
+    "subs": [
+      {"name": "Olive oil", "ratio": "3/4 cup per 1 cup", "note": "Great in saut\u00e9s and most baking; adds a fruity note."},
+      {"name": "Coconut oil", "ratio": "1:1", "note": "Works in nearly everything; keep butter-to-coconut oil flavor in mind."},
+      {"name": "Margarine or shortening", "ratio": "1:1", "note": "Shortening bakes flakiest in pie crusts and biscuits."},
+      {"name": "Applesauce (half-fat hack)", "ratio": "replace half the butter", "note": "Cuts fat and calories in cakes and muffins; texture gets denser."}
+    ]
+  },
+  {
+    "id": "olive-oil", "name": "Olive Oil", "emoji": "\ud83e\udd65",
+    "subs": [
+      {"name": "Neutral oil (canola, vegetable)", "ratio": "1:1", "note": "Best when you don't want olive oil flavor competing."},
+      {"name": "Melted butter", "ratio": "1:1", "note": "Lovely in roasting and pan sauces; smoke point is lower, so keep heat medium."},
+      {"name": "Avocado oil", "ratio": "1:1", "note": "Mild flavor, higher smoke point — a great searing upgrade."},
+      {"name": "Apple cider vinegar (baking)", "ratio": "1:1 in cakes", "note": "In some quick breads, vinegar plus a pinch of baking soda mimics oil's moisture."}
+    ]
+  },
+  {
+    "id": "milk", "name": "Milk", "emoji": "\ud83e\udd5b",
+    "subs": [
+      {"name": "Half & half + water", "ratio": "1:1 by volume", "note": "Best dairy stand-in when a recipe calls for whole milk."},
+      {"name": "Water + 1 tsp butter", "ratio": "per cup of milk", "note": "Keeps the fat where it matters (pan sauces, mashed potatoes)."},
+      {"name": "Oat or soy milk", "ratio": "1:1", "note": "Unsweetened only. The thickest options work best in sauces."},
+      {"name": "Evaporated milk + water", "ratio": "6 oz evaporated + 6 oz water per cup", "note": "Great in soups and casseroles."}
+    ]
+  },
+  {
+    "id": "heavy-cream", "name": "Heavy Cream", "emoji": "\ud83e\udd5b",
+    "subs": [
+      {"name": "Half & half", "ratio": "1:1", "note": "Lighter, won't reduce as thick — simmer a bit longer."},
+      {"name": "Milk + melted butter", "ratio": "3/4 cup milk + 1/4 cup butter per cup cream", "note": "Whisk together; fine for soups, sauces, and most baking."},
+      {"name": "Evaporated milk", "ratio": "1:1", "note": "Richer than regular milk, and it whips decently for a pinch."},
+      {"name": "Coconut cream", "ratio": "1:1", "note": "Dairy-free and luscious; adds a coconut whisper."}
+    ]
+  },
+  {
+    "id": "eggs", "name": "Eggs", "emoji": "\ud83e\udd5a",
+    "subs": [
+      {"name": "Flax egg", "ratio": "1 tbsp ground flax + 3 tbsp water per egg", "note": "Let thicken 5 minutes. Great in cookies, muffins, and breads."},
+      {"name": "Applesauce", "ratio": "1/4 cup per egg", "note": "Moist cakes and quick breads; don't reach for it in custards."},
+      {"name": "Aquafaba", "ratio": "3 tbsp per egg", "note": "Liquid from a can of chickpeas — whips into meringue-worthy peaks."},
+      {"name": "Silken tofu", "ratio": "1/4 cup pur\u00e9ed per egg", "note": "Dense and custardy; excellent in quiches and brownies."}
+    ]
+  },
+  {
+    "id": "honey", "name": "Honey", "emoji": "\ud83c\udf6f",
+    "subs": [
+      {"name": "Maple syrup", "ratio": "1:1 (reduce liquid 1 tbsp per cup)", "note": "Works in glazes and dressings; brings its own earthy sweetness."},
+      {"name": "Brown sugar (dissolved)", "ratio": "1 cup + 1/4 cup water per 3/4 cup honey", "note": "For baking when the flavor matters less than the sweetness."},
+      {"name": "Agave nectar", "ratio": "1:1, or a touch less (it's sweeter)", "note": "Milder flavor; behaves like honey in marinades and drizzles."},
+      {"name": "Golden syrup", "ratio": "1:1", "note": "Closest flavor match for British-style baked goods."}
+    ]
+  },
+  {
+    "id": "brown-sugar", "name": "Brown Sugar", "emoji": "\ud83c\udf6c",
+    "subs": [
+      {"name": "White sugar + molasses", "ratio": "1 cup sugar + 1 tbsp molasses", "note": "Rebuilds the moisture and caramel notes exactly."},
+      {"name": "Maple sugar", "ratio": "1:1", "note": "Slightly less sweet; lovely in oatmeal and glazes."},
+      {"name": "Dark corn syrup or treacle", "ratio": "3/4 cup per cup brown sugar", "note": "Good for baked beans and BBQ-style sauces."}
+    ]
+  },
+  {
+    "id": "all-purpose-flour", "name": "All-Purpose Flour", "emoji": "\ud83e\uddc8",
+    "subs": [
+      {"name": "Bread flour", "ratio": "1:1 (reduce 2 tbsp per cup for tenderness)", "note": "More protein = chewier, springier texture."},
+      {"name": "Cake flour", "ratio": "1:1 + 2 tbsp spooned per cup", "note": "For tenderer baked goods; adds a little back."},
+      {"name": "Almond flour", "ratio": "1:1 in one-to-one baking", "note": "Gluten-free and moist; add a binder if baking a full loaf."},
+      {"name": "Cornstarch + rice flour blend", "ratio": "4 tbsp cornstarch + 1 cup rice flour per 1-1/4 cups AP", "note": "A workable gluten-free swap for cookies and quick breads."}
+    ]
+  },
+  {
+    "id": "cornstarch", "name": "Cornstarch", "emoji": "\u26aa",
+    "subs": [
+      {"name": "Arrowroot powder", "ratio": "1:1", "note": "Glossy shine, keeps setting in the fridge — great for fruit pies."},
+      {"name": "All-purpose flour", "ratio": "2:1 (double the amount)", "note": "Thicker, cloudier, and it needs a longer simmer to lose the raw taste."},
+      {"name": "Tapioca starch", "ratio": "1:1", "note": "Stretchy, glossy gel; classic in bubblegum-flavored puddings."}
+    ]
+  },
+  {
+    "id": "sour-cream", "name": "Sour Cream", "emoji": "\ud83c\udf52",
+    "subs": [
+      {"name": "Greek yogurt", "ratio": "1:1", "note": "Thinner — strain 15 minutes for a spoonable thickness."},
+      {"name": "Cr\u00e8me fra\u00eeche", "ratio": "1:1", "note": "Drop-in equivalent that won't split when simmered."},
+      {"name": "Buttermilk + flour sludge", "ratio": "3/4 cup buttermilk + 2 tbsp flour, simmered 5 min", "note": "Rebuilds the body for tacos and enchiladas."}
+    ]
+  },
+  {
+    "id": "greek-yogurt", "name": "Greek Yogurt", "emoji": "\ud83c\udf52",
+    "subs": [
+      {"name": "Strained regular yogurt", "ratio": "strain 30 min through cheesecloth", "note": "Turns a tub of plain yogurt into Greek-style."},
+      {"name": "Sour cream (thinned)", "ratio": "1:1, loosen with a splash of milk", "note": "Perfect in dressings and baking."},
+      {"name": "Cottage cheese, blended", "ratio": "1:1", "note": "High-protein swap; blend until silky for smoothies and dips."}
+    ]
+  },
+  {
+    "id": "buttermilk", "name": "Buttermilk", "emoji": "\ud83e\udd5b",
+    "subs": [
+      {"name": "Milk + lemon juice or vinegar", "ratio": "1 cup milk + 1 tbsp acid, rest 5 min", "note": "The classic 2-ingredient buttermilk; great in pancakes and biscuits."},
+      {"name": "Plain yogurt + water", "ratio": "3/4 cup yogurt + 1/4 cup water", "note": "Closest tang and thickness."},
+      {"name": "Kefir or sour milk", "ratio": "1:1", "note": "Already acidic and culturable — just use it."}
+    ]
+  },
+  {
+    "id": "soy-sauce", "name": "Soy Sauce", "emoji": "\ud83c\udf72",
+    "subs": [
+      {"name": "Coconut aminos", "ratio": "1:1 (add a pinch of salt)", "note": "Gluten-free and a touch sweeter; dial back other sugar."},
+      {"name": "Worcestershire + water", "ratio": "2 tbsp + 2 tbsp water per 4 tbsp soy", "note": "Good in marinades and stews; adds anchovy depth."},
+      {"name": "Tamari", "ratio": "1:1", "note": "Basically premium soy; usually gluten-free."},
+      {"name": "Fish sauce + water", "ratio": "1 part fish sauce to 3 parts water", "note": "Same umami family — less salty, more savory."}
+    ]
+  },
+  {
+    "id": "chicken-broth", "name": "Chicken Broth", "emoji": "\ud83c\udf72",
+    "subs": [
+      {"name": "Vegetable broth", "ratio": "1:1", "note": "Same body, milder flavor — great in vegetarian swaps."},
+      {"name": "Bouillon + water", "ratio": "1 cube + 1 cup water", "note": "Salty, so taste before adding more salt."},
+      {"name": "Water + 1/2 tsp salt + 1/2 tsp chicken essence", "ratio": "per cup", "note": "In a pinch, water with seasoning still carries a gravy."},
+      {"name": "White wine or dry sherry", "ratio": "1:1 in pan sauces", "note": "Brings brightness instead of savoriness."}
+    ]
+  },
+  {
+    "id": "parmesan", "name": "Parmesan", "emoji": "\ud83e\uddc0",
+    "subs": [
+      {"name": "Pecorino Romano", "ratio": "use 25% less (it's saltier)", "note": "Sharper, saltier punch — brilliant on gnocchi and Caesar."},
+      {"name": "Grana Padano", "ratio": "1:1", "note": "Softer flavor, melts beautifully."},
+      {"name": "Nutritional yeast + cashew cream", "ratio": "1/4 cup yeast blended to a paste", "note": "Dairy-free umami for sauces and popcorn."},
+      {"name": "Aged Asiago", "ratio": "1:1", "note": "Mid-press Asiago is the sleeper hit here."}
+    ]
+  },
+  {
+    "id": "vanilla", "name": "Vanilla Extract", "emoji": "\ud83c\udf6f",
+    "subs": [
+      {"name": "Vanilla bean paste", "ratio": "1:1 (splitters included)", "note": "Stronger — start with a little less."},
+      {"name": "Vanilla bean, scraped", "ratio": "1/2 bean per 1 tsp extract", "note": "Split, scrape, and drop the pod in the pot or batter."},
+      {"name": "Maple syrup", "ratio": "1 tsp per tsp extract", "note": "Adds sweetness plus flavor; reduce other sugar slightly."}
+    ]
+  },
+  {
+    "id": "breadcrumbs", "name": "Breadcrumbs", "emoji": "\ud83e\udd56",
+    "subs": [
+      {"name": "Crushed crackers or cornflakes", "ratio": "1:1", "note": "Toasted in a dry pan for the same crunch on chicken parmesan."},
+      {"name": "Ground oats or crushed cornflakes", "ratio": "1:1", "note": "Gluten-free friendly; cornflakes get extra shatter."},
+      {"name": "Grated hard cheese", "ratio": "1:1", "note": "Parmesan crust trick — browned and nutty."}
+    ]
+  },
+  {
+    "id": "coconut-milk", "name": "Coconut Milk", "emoji": "\ud83c\udf35",
+    "subs": [
+      {"name": "Cashew cream", "ratio": "1:1 (soak and blend)", "note": "Dairy-free creaminess for curries and soups."},
+      {"name": "Heavy cream + pinch of salt", "ratio": "1:1", "note": "Loses the coconut note but keeps the richness."},
+      {"name": "Full-fat soy milk + 1 tbsp cornstarch", "ratio": "per cup, simmer to thicken", "note": "Lighter-bodied; thicken with the slurry."}
+    ]
+  },
+  {
+    "id": "ground-beef", "name": "Ground Beef", "emoji": "\ud83e\udd69",
+    "subs": [
+      {"name": "Lentils + mushrooms", "ratio": "1/2 cup dried lentils + 2 cups mushrooms per lb", "note": "Cook lentils first; crumble mushrooms for texture. Chili heaven."},
+      {"name": "Ground turkey", "ratio": "1:1", "note": "Leaner — add a spoonful of olive oil to brown properly."},
+      {"name": "Crumbled tempeh or extra-firm tofu", "ratio": "1:1", "note": "Press, crumble, brown with soy and paprika. Bolognese-approved."}
+    ]
+  },
+  {
+    "id": "cheddar", "name": "Cheddar", "emoji": "\ud83e\uddc0",
+    "subs": [
+      {"name": "Gruy\u00e8re", "ratio": "1:1", "note": "Nuttier and silkier melt — great upgrade for mac and gratins."},
+      {"name": "Colby or Monterey Jack", "ratio": "1:1", "note": "Milder, meltier; less tang."},
+      {"name": "Blended mozzarella + a little sharp cheddar", "ratio": "3:1", "note": "Rebuilds the stretch-plus-tang combo for pizzas and casseroles."}
+    ]
+  },
+  {
+    "id": "spinach", "name": "Spinach", "emoji": "\ud83e\udd4c",
+    "subs": [
+      {"name": "Swiss chard", "ratio": "1:1 (stem on the cutting board first)", "note": "Slightly earthier; stems need 2–3 extra minutes."},
+      {"name": "Kale", "ratio": "3/4 the amount (it's denser)", "note": "Massage with a pinch of salt for the tenderest result."},
+      {"name": "Frozen chopped spinach", "ratio": "1:1, thawed and squeezed dry", "note": "The laziest, cheapest swap — squeeze out the water or soups get watery."}
+    ]
+  },
+  {
+    "id": "rice-vinegar", "name": "Rice Vinegar", "emoji": "\ud83c\udf76",
+    "subs": [
+      {"name": "White wine vinegar", "ratio": "1:1, add a pinch of sugar", "note": "Brighter edge; sugar tames it for dressings."},
+      {"name": "Apple cider vinegar", "ratio": "3/4 the amount", "note": "Tangy and fruity; less is more in marinades."},
+      {"name": "Lemon or lime juice", "ratio": "3/4 the amount", "note": "Fresh citrus brightness instead of fermented tang."}
+    ]
+  },
+  {
+    "id": "turmeric", "name": "Turmeric", "emoji": "\ud83e\udd4c",
+    "subs": [
+      {"name": "Saffron threads", "ratio": "a pinch per 1/2 tsp (and it costs a fortune)", "note": "Use sparingly — it's potent and expensive."},
+      {"name": "Ground ginger + a pinch of yellow food coloring", "ratio": "1:1", "note": "Ginger carries the flavor; color is optional."},
+      {"name": "Curry powder (extra)", "ratio": "1 tbsp per 1/2 tsp turmeric", "note": "Adds warmth and color at the same time."}
+    ]
+  },
+  {
+    "id": "lemon", "name": "Lemon (juice/zest)", "emoji": "\ud83c\udf4b",
+    "subs": [
+      {"name": "Lime juice", "ratio": "1:1", "note": "Brighter, greener flavor — swaps easily in most dishes."},
+      {"name": "White wine vinegar", "ratio": "3/4 the amount", "note": "Keeps acidity; loses the perfume."},
+      {"name": "Marmite or a splash of fish sauce (savory dishes)", "ratio": "a drop or two", "note": "For depth when you want the brightness gone."}
+    ]
+  },
+  {
+    "id": "basil-pesto", "name": "Basil Pesto", "emoji": "\ud83c\udf3f",
+    "subs": [
+      {"name": "Dried basil + olive oil + parmesan", "ratio": "2 tbsp dried + 3 tbsp oil + 2 tbsp parmesan", "note": "Stirs right into warm orzo or pasta."},
+      {"name": "Green olive tapenade", "ratio": "3/4 the amount", "note": "Salty, briny, and gorgeous with blistered tomatoes."},
+      {"name": "Blended fresh basil, oil, and a garlic clove", "ratio": "to taste", "note": "30 seconds in a blender — the real fix."}
+    ]
+  },
+  {
+    "id": "italian-sausage", "name": "Italian Sausage", "emoji": "\ud83c\udf66",
+    "subs": [
+      {"name": "Chorizo (casing removed)", "ratio": "1:1", "note": "Spicier and smokier; great in sheet pan dinners."},
+      {"name": "Pork crumbles + fennel seed", "ratio": "1 lb pork + 1/2 tsp fennel + 1/4 tsp red pepper", "note": "Rebuilds the Italian seasoning profile."},
+      {"name": "Chicken and sausage or plant-based links", "ratio": "1:1", "note": "Look for the fennel-forward varieties."}
+    ]
+  }
+]

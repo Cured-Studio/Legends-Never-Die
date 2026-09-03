@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:40px; max-width:760px">
+    <h1 style="font-size:40px; margin:0 0 10px">Why “The Plate Scraper”?</h1>
+    <p style="font-size:17px; color:#4a4238">Because the best part of a great meal is what you scrape off the plate. The name stuck, and the tool followed: a home-cooking platform built around one belief — <em>the best recipe on the internet should take 10 seconds to get into your kitchen.</em></p>
+    <p style="font-size:17px; color:#4a4238">So we built the scraper first. Paste a URL, get a clean card you own. Then everything a real kitchen needs around it: a substitution guide with honest ratios, a shopping list that groups by aisle and merges quantities, a members area that remembers your scrapes, and a Feed Room that follows your favorite recipe blogs and rewrites their posts into your own voice — always with credit where it's due.</p>
+    <h2 style="font-size:26px; margin-top:34px">The tools, in one breath</h2>
+    <ul style="font-size:16px; color:#4a4238; line-height:2">
+      <li><b>🧲 Recipe Scraper</b> — URL or pasted HTML/text → your recipe card</li>
+      <li><b>📡 Feed Room</b> — RSS reader + house-style rewriter for recipe blogs</li>
+      <li><b>🔁 Substitution Guide</b> — 26 staples, exact ratios</li>
+      <li><b>🛒 Shopping List</b> — aisle-grouped, syncs to your account</li>
+      <li><b>👩‍🍳 Members Area</b> — saved recipes, scrape history, tiers</li>
+      <li><b>🎛 Affiliate Control Panel</b> — stores, tracked links, revenue dashboard</li>
+      <li><b>🗄 MySQL Wizard</b> — point the whole thing at a real database, in five steps</li>
+    </ul>
+    <h2 style="font-size:26px; margin-top:34px">Running it yourself</h2>
+    <p style="font-size:16px; color:#4a4238">The server is plain Python (standard library only — it runs anywhere). Want MySQL? On Windows, one script does it all:</p>
+    <pre class="mono" style="background:var(--ink); color:#f4ecdd; padding:16px; border-radius:12px; font-size:13px; overflow:auto">powershell -ExecutionPolicy Bypass -File .\setup-theplatescraper.ps1</pre>
+    <p style="font-size:14px; color:var(--ink-soft)">…or finish it by hand in the browser at <a href="/setup.html">/setup.html</a> (the MySQL Wizard) and keep the JSON file as a hot backup. The whole site lives at <b>theplatescraper.com</b> when you're ready to point the domain at it.</p>
+    <p style="font-size:14px; color:var(--ink-faint); margin-top:30px">The Plate Scraper is an independent project. Recipes in the library are original to our kitchen; content rewritten in the Feed Room always credits its source. Some links are affiliate links, and that's a proud, advertised part of the plan.</p>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>TNS.init("about");</script>
+</body>
+</html>

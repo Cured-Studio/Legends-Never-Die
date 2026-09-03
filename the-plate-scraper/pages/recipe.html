@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipe — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap">
+    <div class="crumb"><a href="/">Home</a> · <a href="/recipes.html">Recipes</a> · <span id="crumb-title">…</span></div>
+    <div id="detail"><div class="empty-plate"><div class="big">🍜</div>Plating up…</div></div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("recipes");
+const slug = location.pathname.split("/").pop();
+let R = null, GEAR = [], SUBS = {}, factor = 1;
+
+function swapLink(item) {
+  const key = (item || "").toLowerCase();
+  const found = Object.keys(SUBS).find(k => {
+    const name = (SUBS[k] && SUBS[k].name || "").toLowerCase();
+    return name && (key.includes(name.split(" ")[0]) || name.split(" ")[0].includes(key.split(" ")[0]));
+  });
+  return found ? '<a class="swaplink" href="/substitutions.html#' + found + '">swap ↗</a>' : "";
+}
+
+function render() {
+  const f = factor;
+  const ings = R.ingredients.map(i =>
+    '<li><span class="q">' + TNS.scaleQty(i.qty, f) + (i.unit ? " " + i.unit : "") + '</span>' +
+    '<span class="n">' + TNS.esc(i.item) + (i.note ? ' <small style="color:var(--ink-faint)">(' + TNS.esc(i.note) + ")</small>" : "") + "</span>" +
+    swapLink(i.item) + '<span class="aisle">' + TNS.esc(i.aisle) + "</span></li>").join("");
+  const steps = R.steps.map((s, i) =>
+    '<div class="step"><div class="n">' + (i + 1) + "</div><p>" + TNS.esc(s) + "</p></div>").join("");
+  const n = R.nutrition || {};
+  const gear = GEAR.map(g =>
+    '<div class="gear-item"><span class="g" style="background:' + g.storeColor + '">' + TNS.esc((g.store || "?").slice(0, 2).toUpperCase()) + "</span>" +
+    "<div><b>" + TNS.esc(g.name) + "</b><span>" + TNS.esc(g.note || "From our gear shelf") + " · " + TNS.fmtMoney(g.price) + "</span></div>" +
+    '<button class="btn btn-primary btn-sm go" data-affiliate="' + (g.code || "") + '">View →</button></div>').join("");
+  document.getElementById("detail").innerHTML =
+    '<div class="recipe-hero">' +
+    '<div><div class="meta-chips">' +
+    '<span class="chip">📁 ' + TNS.esc(R.category) + "</span>" +
+    '<span class="chip">⏱ <b>' + R.time + " min</b></span>" +
+    '<span class="chip">🔥 <b>' + TNS.esc(R.difficulty) + "</b></span>" +
+    (R.rating ? '<span class="chip"><span class="starrating">★</span> <b>' + Number(R.rating).toFixed(1) + "</b> · " + R.reviews + " cook reports</span>" : '<span class="chip">✨ newly scraped</span>') +
+    (R.source ? '<span class="chip">🧲 scraped from ' + TNS.esc(R.source) + "</span>" : "") +
+    "</div>" +
+    "<h1>" + TNS.esc(R.title) + "</h1>" +
+    "<p class='desc'>" + TNS.esc(R.description) + "</p>" +
+    '<div class="serve-control"><button id="sminus">−</button>' +
+    '<span class="val"><span id="sval">' + R.servings + "</span> servings<small>scale the pantry</small></span>" +
+    '<button id="splus">+</button></div>' +
+    '<div class="recipe-actions">' +
+    '<button class="btn btn-primary" id="savebtn">' + (R.savedByMe ? "❤️ Saved" : "🤍 Save to my recipes") + "</button>" +
+    '<button class="btn btn-sage" id="listbtn">🛒 Add all to shopping list</button>' +
+    '<a class="btn btn-ghost" id="printbtn" href="javascript:window.print()">🖨 Print card</a>' +
+    "</div></div>" +
+    '<div class="img">' + (R.image ? '<img src="' + R.image + '" alt="' + TNS.esc(R.title) + '">' : '<div class="noimg" style="height:100%">🍲</div>') + "</div></div>" +
+    '<div class="recipe-cols">' +
+    '<div class="ing-panel"><h2>Ingredients</h2><div class="hint">Quantities scale with the servings above. “swap ↗” jumps to a ratio in the Substitution Guide.</div>' +
+    '<ul class="ing-list" id="inglist">' + ings + "</ul>" +
+    (gear ? '<h2 style="font-size:17px; margin-top:20px">From our gear shelf</h2><div class="gear-row">' + gear + "</div>" +
+    '<p class="affiliate-note">Gear links are affiliate links — they keep the scraper running.</p>' : "") +
+    "</div>" +
+    '<div class="steps-panel"><h2>Method</h2>' + steps +
+    (n.calories ? '<div class="nutrition">' +
+    [["calories", n.calories], ["protein (g)", n.protein], ["carbs (g)", n.carbs], ["fat (g)", n.fat],
+     ["fiber (g)", n.fiber], ["sugar (g)", n.sugar], ["sodium (mg)", n.sodium], ["per serving", ""]]
+    .filter(x => x[1] !== "").slice(0, 4)
+    .map(x => '<div class="n"><b>' + x[1] + "</b><span>" + x[0] + "</span></div>").join("") + "</div>" : "") +
+    "</div></div>";
+
+  document.getElementById("crumb-title").textContent = R.title;
+  document.title = R.title + " — The Plate Scraper";
+  let cur = R.servings;
+  document.getElementById("sminus").onclick = () => { if (cur > 1) { cur--; factor = cur / R.servings; syncServes(); } };
+  document.getElementById("splus").onclick = () => { if (cur < 12) { cur++; factor = cur / R.servings; syncServes(); } };
+  function syncServes() {
+    document.getElementById("sval").textContent = cur;
+    const rows = document.querySelectorAll("#inglist li");
+    rows.forEach((li, i) => {
+      const q = li.querySelector(".q");
+      const orig = R.ingredients[i];
+      q.textContent = TNS.scaleQty(orig.qty, factor) + (orig.unit ? " " + orig.unit : "");
+    });
+  }
+  document.getElementById("savebtn").onclick = async (e) => {
+    if (!TNS.requireLogin("Sign in to save recipes.")) return;
+    const d = await TNS.api("recipes/" + R.slug + "/save").catch(err => { TNS.toast(err.message, "err"); return null; });
+    if (d) { R.savedByMe = d.saved; e.target.textContent = d.saved ? "❤️ Saved" : "🤍 Save to my recipes"; TNS.toast(d.saved ? "Saved to your kitchen." : "Removed.", "ok"); }
+  };
+  document.getElementById("listbtn").onclick = async () => {
+    if (!TNS.requireLogin("Sign in to sync your shopping list (guests can keep it on this device).")) return;
+    try {
+      const items = R.ingredients.map(i => ({ item: i.item, qty: TNS.parseQty(TNS.scaleQty(i.qty, factor)), unit: i.unit, aisle: i.aisle }));
+      await TNS.addToList(items, R.title);
+      TNS.toast(items.length + " ingredients sent to your shopping list 🛒", "ok");
+    } catch (e) { TNS.toast(e.message, "err"); }
+  };
+}
+
+(async () => {
+  try {
+    const d = await TNS.api("recipes/" + slug);
+    R = d.recipe; GEAR = d.gear; SUBS = d.substitutions || {};
+    R.savedByMe = d.savedByMe;
+    render();
+  } catch (e) {
+    document.getElementById("detail").innerHTML =
+      '<div class="empty-plate"><div class="big">🍽</div><p>' + TNS.esc(e.message) + '</p><a class="btn btn-primary" href="/recipes.html">Back to the library</a></div>';
+  }
+})();
+</script>
+</body>
+</html>

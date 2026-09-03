@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopping List — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:34px">
+    <h1 style="font-size:36px; margin:0 0 6px">🛒 Your Shopping List</h1>
+    <p style="color:var(--ink-soft); margin:0 0 22px" id="subline">Grouped by aisle, quantities merged, tap to check off. Add whole recipes from any recipe card.</p>
+    <div class="shop-grid">
+      <div id="list"><div class="result-empty" style="padding:40px"><div class="big">🧺</div>Gathering your list…</div></div>
+      <div>
+        <div class="sidebox">
+          <h3>This list</h3>
+          <div class="big" id="stat-count">0</div>
+          <div style="font-size:13px; color:var(--ink-soft)" id="stat-detail">items · 0 picked up</div>
+        </div>
+        <div class="sidebox">
+          <h3>Quick add</h3>
+          <div class="field"><input type="text" id="qa-item" placeholder="e.g. lemons"></div>
+          <div class="row2" style="margin-bottom:10px">
+            <input type="text" id="qa-qty" placeholder="qty (e.g. 2)">
+            <input type="text" id="qa-aisle" placeholder="aisle (optional)">
+          </div>
+          <button class="btn btn-dark btn-sm" id="b-qa" style="width:100%">＋ Add item</button>
+        </div>
+        <div class="sidebox">
+          <h3>Handy</h3>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <button class="btn btn-ghost btn-sm" id="b-copy">⧉ Copy list as text</button>
+            <button class="btn btn-ghost btn-sm" id="b-print">🖨 Print</button>
+            <button class="btn btn-ghost btn-sm" id="b-clearpurchased">✓ Remove picked-up</button>
+            <button class="btn btn-ghost btn-sm" id="b-clearall" style="color:var(--terra-dark)">🗑 Clear whole list</button>
+          </div>
+          <ul id="syncnote"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("shopping");
+const AISLES = ["produce", "meat & seafood", "dairy & eggs", "dry goods", "pantry", "spices", "oils & vinegars", "condiments", "frozen", "herbs"];
+let ITEMS = [];
+
+function render() {
+  const el = document.getElementById("list");
+  const open = ITEMS.filter(i => !i.purchased);
+  if (!ITEMS.length) {
+    el.innerHTML = '<div class="result-empty" style="padding:50px"><div class="big">🧺</div>Your list is empty.<br>Open any recipe and hit <b>“Add all to shopping list.”</b></div>';
+  } else {
+    el.innerHTML = AISLES.filter(a => open.some(i => (i.aisle || "pantry") === a)).map(a =>
+      '<div class="aisle-block"><h3>' + a + "</h3>" +
+      open.filter(i => (i.aisle || "pantry") === a).map(row).join("") + "</div>").join("") +
+      (ITEMS.filter(i => i.purchased).length ? '<div class="aisle-block"><h3>Picked up</h3>' +
+        ITEMS.filter(i => i.purchased).map(row).join("") + "</div>" : "");
+  }
+  document.getElementById("stat-count").textContent = ITEMS.length;
+  document.getElementById("stat-detail").textContent = ITEMS.length + " items · " + ITEMS.filter(i => i.purchased).length + " picked up";
+  el.querySelectorAll(".cbx").forEach(b => b.onclick = () => toggle(b.dataset.id));
+  el.querySelectorAll(".rm").forEach(b => b.onclick = () => remove(b.dataset.id));
+  document.getElementById("syncnote").innerHTML = TNS.me
+    ? "<li>Synced to <b>" + TNS.esc(TNS.me.email) + "</b> — follow it from any device.</li>"
+    : "<li>Guest mode: this list lives in this browser only. <a href='/members.html'><b>Create a free account</b></a> to sync it.</li>";
+  document.getElementById("subline").textContent = TNS.me
+    ? "Grouped by aisle, quantities merged, tap to check off. Synced to your account."
+    : "Grouped by aisle, quantities merged, tap to check off. (Guest mode — stored in this browser.)";
+}
+function row(i) {
+  return '<div class="listrow' + (i.purchased ? " done" : "") + '">' +
+    '<button class="cbx' + (i.purchased ? " on" : "") + '" data-id="' + i.id + '">✓</button>' +
+    '<span class="q">' + (i.qty ? TNS.fmtQty(i.qty) + (i.unit ? " " + i.unit : "") : "—") + "</span>" +
+    '<span class="n">' + TNS.esc(i.name) + "</span>" +
+    '<span class="from">' + (i.recipe ? "from " + TNS.esc(i.recipe) : "") + "</span>" +
+    '<button class="rm" data-id="' + i.id + '" title="Remove">✕</button></div>';
+}
+function reload() { return TNS.getList().then(l => { ITEMS = l; render(); }); }
+async function toggle(id) {
+  if (TNS.me) {
+    const d = await TNS.api("list/toggle", { body: { id } }); ITEMS = d.items;
+  } else {
+    const it = ITEMS.find(x => x.id === id); if (it) it.purchased = !it.purchased;
+    TNS.saveLocalList(ITEMS);
+  }
+  render();
+}
+async function remove(id) {
+  if (TNS.me) { const d = await TNS.api("list/remove", { body: { id } }); ITEMS = d.items; }
+  else { ITEMS = ITEMS.filter(x => x.id !== id); TNS.saveLocalList(ITEMS); }
+  render();
+}
+document.getElementById("b-qa").onclick = async () => {
+  const name = document.getElementById("qa-item").value.trim();
+  if (!name) return;
+  const qtyRaw = document.getElementById("qa-qty").value.trim();
+  const aisle = (document.getElementById("qa-aisle").value.trim() || "pantry").toLowerCase();
+  if (TNS.me) {
+    try {
+      const d = await TNS.api("list/add", { body: { items: [{ item: name, qty: TNS.parseQty(qtyRaw), unit: "", aisle }] } });
+      ITEMS = d.items;
+    } catch (e) { TNS.toast(e.message, "err"); return; }
+  } else {
+    const q = TNS.parseQty(qtyRaw);
+    const ex = ITEMS.find(x => x.name.toLowerCase() === name.toLowerCase() && !x.unit);
+    if (ex) { if (q && ex.qty) ex.qty = Math.round((ex.qty + q) * 100) / 100; else if (q) ex.qty = q; }
+    else ITEMS.push({ id: "g" + Date.now(), name, qty: q, unit: "", aisle, recipe: "", purchased: false });
+    TNS.saveLocalList(ITEMS);
+  }
+  document.getElementById("qa-item").value = ""; document.getElementById("qa-qty").value = ""; document.getElementById("qa-aisle").value = "";
+  render(); TNS.toast("Added " + name, "ok");
+};
+document.getElementById("b-copy").onclick = () => {
+  if (!ITEMS.length) return TNS.toast("Nothing to copy yet.", "err");
+  const txt = "THE PLATE SCRAPER — SHOPPING LIST\n\n" + AISLES.filter(a => ITEMS.some(i => (i.aisle || "pantry") === a)).map(a =>
+    a.toUpperCase() + "\n" + ITEMS.filter(i => (i.aisle || "pantry") === a).map(i =>
+      (i.purchased ? "[x] " : "[ ] ") + (i.qty ? TNS.fmtQty(i.qty) + (i.unit ? " " + i.unit : "") + " " : "") + i.name).join("\n")).join("\n\n");
+  navigator.clipboard.writeText(txt).then(() => TNS.toast("List copied ⧉", "ok"));
+};
+document.getElementById("b-print").onclick = () => window.print();
+document.getElementById("b-clearpurchased").onclick = async () => {
+  if (!TNS.me) { ITEMS = ITEMS.filter(i => !i.purchased); TNS.saveLocalList(ITEMS); render(); return; }
+  const d = await TNS.api("list/clear", { body: { mode: "purchased" } }); ITEMS = d.items; render(); TNS.toast("Picked-up items cleared", "ok");
+};
+document.getElementById("b-clearall").onclick = async () => {
+  if (!confirm("Clear the whole list?")) return;
+  if (!TNS.me) { ITEMS = []; TNS.saveLocalList(ITEMS); render(); return; }
+  const d = await TNS.api("list/clear", { body: { mode: "all" } }); ITEMS = d.items; render(); TNS.toast("List cleared", "ok");
+};
+reload();
+</script>
+</body>
+</html>

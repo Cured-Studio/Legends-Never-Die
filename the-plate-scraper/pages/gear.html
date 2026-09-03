@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitchen Gear — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:34px">
+    <h1 style="font-size:36px; margin:0 0 6px">🍳 The Gear Shelf</h1>
+    <p style="color:var(--ink-soft); margin:0 0 24px">The exact tools behind the recipes in the library. We only list what we actually use — every button below is a tracked affiliate link, and that's how the scraper keeps running.</p>
+    <div class="gear-grid" id="gear"><div class="empty-plate"><div class="big">🛠</div>Polishing the tools…</div></div>
+    <p class="affiliate-note">As an Amazon Associate and participant in other affiliate programs, The Plate Scraper earns from qualifying purchases. Prices shown are approximations at time of writing.</p>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("gear");
+(async () => {
+  try {
+    const d = await TNS.api("gear");
+    document.getElementById("gear").innerHTML = d.items.map(g =>
+      '<div class="gear-card"><span class="g" style="background:' + g.storeColor + '">' + TNS.esc((g.store || "?").slice(0, 2).toUpperCase()) + "</span>" +
+      "<b>" + TNS.esc(g.name) + "</b>" +
+      '<div class="note">' + TNS.esc(g.note || "") + (g.recipeSlug ? ' · <a href="/recipe/' + g.recipeSlug + '">see the recipe</a>' : "") + "</div>" +
+      '<div class="foot"><span class="price">' + TNS.fmtMoney(g.price) + "</span>" +
+      '<button class="btn btn-primary btn-sm" data-affiliate="' + (g.code || "") + '">View at ' + TNS.esc(g.store) + " →</button></div></div>").join("");
+  } catch (e) {
+    document.getElementById("gear").innerHTML = '<div class="empty-plate" style="grid-column:1/-1"><div class="big">⚠️</div>' + TNS.esc(e.message) + "</div>";
+  }
+})();
+</script>
+</body>
+</html>

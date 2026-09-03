@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Affiliate Control Panel — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:34px">
+    <h1 style="font-size:34px; margin:0 0 4px">🎛 Affiliate Control Panel</h1>
+    <p style="color:var(--ink-soft); margin:0 0 22px">The owner's back office for theplatescraper.com: stores, tracked links, click history, and estimated commission.</p>
+
+    <div class="auth-card hidden" id="loginbox" style="margin:20px auto">
+      <h1>Control panel login</h1>
+      <p class="sub">Owner access only. Demo credentials: <b>admin@theplatescraper.com / plate-admin-2026</b></p>
+      <div class="field"><label>Email</label><input type="email" id="a-email" value="admin@theplatescraper.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="a-pass" value="plate-admin-2026"></div>
+      <button class="btn btn-dark" style="width:100%" onclick="adminLogin()">Unlock the panel →</button>
+    </div>
+
+    <div id="panel" class="hidden">
+      <div class="admin-shell">
+        <nav class="admin-nav" id="anav">
+          <button class="on" data-t="overview">📊 Overview</button>
+          <button data-t="stores">🏪 Stores</button>
+          <button data-t="products">🍳 Products</button>
+          <button data-t="links">🔗 Tracked Links</button>
+          <button data-t="clicks">👀 Click Feed</button>
+          <button data-t="db" onclick="location.href='/setup.html'">🗄 MySQL Wizard ↗</button>
+        </nav>
+        <div id="atab"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("affiliate");
+let O = null;
+async function adminLogin() {
+  try {
+    await TNS.api("admin/login", { body: { email: document.getElementById("a-email").value, password: document.getElementById("a-pass").value } });
+    TNS.toast("Panel unlocked", "ok");
+    enter();
+  } catch (e) { TNS.toast(e.message, "err"); }
+}
+async function enter() {
+  try {
+    const d = await TNS.api("admin/overview");
+    O = d.overview;
+    document.getElementById("loginbox").classList.add("hidden");
+    document.getElementById("panel").classList.remove("hidden");
+    tab("overview");
+  } catch (e) {
+    document.getElementById("loginbox").classList.remove("hidden");
+  }
+}
+document.getElementById("anav").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]");
+  if (!b || b.dataset.t === "db") return;
+  document.querySelectorAll("#anav button").forEach(x => x.classList.toggle("on", x === b));
+  tab(b.dataset.t);
+});
+async function tab(t) {
+  const el = document.getElementById("atab");
+  el.innerHTML = '<div class="result-empty">Loading…</div>';
+  const $ = (h) => { el.innerHTML = h; };
+  if (t === "overview") {
+    const max = Math.max(...O.days.map(d => d.count), 1);
+    $(
+      '<div class="kpi-grid">' +
+      kpi(O.clicks7 + " clicks", "last 7 days", "+ trending") +
+      kpi(O.clicks14 + " clicks", "last 14 days") +
+      kpi("$" + O.est14.toFixed(2), "est. commission · 14d", "at " + Math.round(O.convRate * 100) + "% conv.") +
+      kpi(O.activeLinks + " live", "tracked links") +
+      "</div>" +
+      '<div class="tool-grid"><div class="panel"><h2>Clicks by day</h2><p class="sub">Trailing 14 days across all tracked gear links.</p>' +
+      '<div class="barchart">' + O.days.map(d =>
+        '<div class="bar" style="height:' + Math.round(d.count / max * 100) + '%"><span>' + d.count + '</span><i>' + d.label + "</i></div>").join("") +
+      "</div><div style='height:24px'></div></div>" +
+      '<div class="panel"><h2>Top products · 14d</h2><table class="tbl"><tr><th>Product</th><th>Store</th><th>Clicks</th><th>Est.</th></tr>' +
+      O.topProducts.map(r => "<tr><td>" + TNS.esc(r.product) + "</td><td>" + TNS.esc(r.store) + "</td><td><b>" + r.clicks + "</b></td><td>" + TNS.fmtMoney(r.estRevenue) + "</td></tr>").join("") +
+      "</table><p style='font-size:12px;color:var(--ink-faint)'>Also on deck: " + O.members + " members · " + O.scrapes + " scrapes served.</p></div></div>");
+  }
+  if (t === "stores") {
+    const d = await TNS.api("admin/stores");
+    $(
+      '<div class="panel"><h2>Affiliate stores</h2><p class="sub">Programs you publish links through.</p>' +
+      '<table class="tbl"><tr><th>Store</th><th>Program</th><th>Ref</th><th>Rate</th><th>Products</th><th></th></tr>' +
+      d.stores.map(s => "<tr><td><span class='store-dot' style='background:" + s.color + "'></b>" + TNS.esc(s.name) + "</td><td>" + TNS.esc(s.program) +
+      "</td><td class='codechip'>" + TNS.esc(s.id_ref) + "</td><td>" + Math.round(s.rate * 100) + "%</td><td>" + s.productCount +
+      "</td><td><button class='btn btn-ghost btn-sm rm-st' data-id='" + s.id + "'>Remove</button></td></tr>").join("") +
+      "</table>" +
+      '<h3 style="margin-top:22px">Add a store</h3>' +
+      '<div class="row2"><div class="field"><label>Store name</label><input id="ns-name" placeholder="e.g. Cuisinart"></div>' +
+      '<div class="field"><label>Program</label><input id="ns-prog" placeholder="e.g. Impact Network"></div></div>' +
+      '<div class="row2"><div class="field"><label>Ref / affiliate ID</label><input id="ns-ref" placeholder="abc123-20"></div>' +
+      '<div class="field"><label>Commission %</label><input id="ns-rate" type="number" value="5" min="0" max="60"></div></div>' +
+      '<button class="btn btn-primary btn-sm" id="b-addst">＋ Add store</button></div>');
+    el.querySelectorAll(".rm-st").forEach(b => b.onclick = async () => {
+      if (!confirm("Remove this store (and its products + links)?")) return;
+      await TNS.api("admin/stores/" + b.dataset.id + "/remove"); tab("stores"); TNS.toast("Store removed", "ok");
+    });
+    el.querySelector("#b-addst").onclick = async () => {
+      try {
+        await TNS.api("admin/stores", { body: {
+          name: el.querySelector("#ns-name").value, program: el.querySelector("#ns-prog").value,
+          id_ref: el.querySelector("#ns-ref").value, rate: (parseFloat(el.querySelector("#ns-rate").value) || 5) / 100,
+        }});
+        TNS.toast("Store added", "ok"); tab("stores");
+      } catch (e) { TNS.toast(e.message, "err"); }
+    };
+  }
+  if (t === "products") {
+    const [d, st] = await Promise.all([TNS.api("admin/products"), TNS.api("admin/stores")]);
+    $(
+      '<div class="panel"><h2>Tracked products</h2><p class="sub">Every product carries a tracked link ( /go/CODE ).</p>' +
+      '<table class="tbl"><tr><th>Product</th><th>Store</th><th>Price</th><th>Link</th><th></th></tr>' +
+      d.products.map(p => "<tr><td><b>" + TNS.esc(p.name) + "</b><br><small style='color:var(--ink-faint)'>" + TNS.esc(p.note || "") + "</small></td>" +
+      "<td>" + TNS.esc(p.storeName) + "</td><td>" + TNS.fmtMoney(p.price) + '</td><td><span class="codechip">/go/' + (p.code || "—") + "</span></td>" +
+      '<td><button class="btn btn-ghost btn-sm rm-p" data-id="' + p.id + '">Remove</button></td></tr>').join("") +
+      "</table>" +
+      '<h3 style="margin-top:22px">Add a product</h3>' +
+      '<div class="row2"><div class="field"><label>Name</label><input id="np-name" placeholder="10\" Carbon Steel Skillet"></div>' +
+      '<div class="field"><label>Store</label><select id="np-store">' + st.stores.map(s => '<option value="' + s.id + '">' + TNS.esc(s.name) + "</option>").join("") + "</select></div></div>" +
+      '<div class="row2"><div class="field"><label>Price ($)</label><input id="np-price" type="number" step="0.01" value="24.99"></div>' +
+      '<div class="field"><label>Note (why it\'s on the list)</label><input id="np-note" placeholder="For the chicken parmesan"></div></div>' +
+      '<div class="field"><label>Destination URL (real store link)</label><input id="np-url" placeholder="https://store.example.com/skillet?ref=..."></div>' +
+      '<button class="btn btn-primary btn-sm" id="b-addp">＋ Add product + generate link</button></div>');
+    el.querySelectorAll(".rm-p").forEach(b => b.onclick = async () => {
+      if (!confirm("Remove this product and its tracked link?")) return;
+      await TNS.api("admin/products/" + b.dataset.id + "/remove"); tab("products"); TNS.toast("Product removed", "ok");
+    });
+    el.querySelector("#b-addp").onclick = async () => {
+      try {
+        await TNS.api("admin/products", { body: {
+          name: el.querySelector("#np-name").value, store: el.querySelector("#np-store").value,
+          price: el.querySelector("#np-price").value, note: el.querySelector("#np-note").value,
+          dest_url: el.querySelector("#np-url").value,
+        }});
+        TNS.toast("Product added with a fresh /go/ link", "ok"); tab("products");
+      } catch (e) { TNS.toast(e.message, "err"); }
+    };
+  }
+  if (t === "links") {
+    const d = await TNS.api("admin/links");
+    $(
+      '<div class="panel"><h2>Tracked links</h2><p class="sub">Clicks are logged server-side on redirect. Estimated commission assumes a ' + Math.round(O.convRate * 100) + "% click→purchase rate.</p>" +
+      '<table class="tbl"><tr><th>Link</th><th>Product</th><th>Store</th><th>Clicks 14d</th><th>Est. $</th><th>Created</th></tr>' +
+      d.links.map(l => "<tr><td><span class='codechip'>theplatescraper.com" + TNS.esc(l.url.split("theplatescraper.com")[1]) + "</span></td>" +
+      "<td>" + TNS.esc(l.product) + "</td><td>" + TNS.esc(l.store) + "</td><td><b>" + l.clicks14 + "</b></td><td>" + TNS.fmtMoney(l.estRevenue) +
+      "</td><td>" + new Date(l.created * 1000).toLocaleDateString() + "</td></tr>").join("") +
+      "</table></div>");
+  }
+  if (t === "clicks") {
+    const d = await TNS.api("admin/clicks");
+    $(
+      '<div class="panel"><h2>Live click feed</h2><p class="sub">Most recent 40 tracked clicks.</p>' +
+      '<table class="tbl"><tr><th>When</th><th>Link</th><th>Product</th><th>Via</th></tr>' +
+      d.clicks.map(c => "<tr><td>" + TNS.timeAgo(c.ts) + '</td><td><span class="codechip">/go/' + c.code + "</span></td>" +
+      "<td>" + TNS.esc(c.product) + '</td><td>' + TNS.esc(c.path) + "</td></tr>").join("") +
+      "</table></div>");
+  }
+}
+function kpi(big, small, delta) {
+  return '<div class="kpi"><b>' + big + "</b><span>" + small + (delta ? '<div class="delta">' + delta + "</div>" : "") + "</span></div>";
+}
+(async () => {
+  try { const d = await TNS.api("admin/overview"); enter(); }
+  catch (e) { document.getElementById("loginbox").classList.remove("hidden"); }
+})();
+</script>
+</body>
+</html>

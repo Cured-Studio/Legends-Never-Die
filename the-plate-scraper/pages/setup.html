@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MySQL Wizard — The Plate Scraper</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23c75b39'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23faf5ec'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <div class="wrap" style="padding-top:34px; max-width:860px">
+    <h1 style="font-size:36px; margin:0 0 6px">🗄 MySQL Wizard</h1>
+    <p style="color:var(--ink-soft); margin:0 0 8px">Point The Plate Scraper at a MySQL database: create the database, apply the schema, migrate every recipe and member, and flip the live store. The JSON file stays as a hot backup either way. On Windows you can skip all of this and let <span class="codechip">setup-theplatescraper.ps1</span> do it in one command.</p>
+    <div id="statusbar"></div>
+
+    <div class="tabs" id="steptabs" style="margin-top:22px">
+      <button data-s="0" class="on">1 · Status</button>
+      <button data-s="1">2 · Connect</button>
+      <button data-s="2">3 · Create</button>
+      <button data-s="3">4 · Migrate</button>
+      <button data-s="4">5 · Activate</button>
+    </div>
+
+    <div class="panel" id="step0">
+      <h2>Current status</h2>
+      <p class="sub">Where the site is reading from right now, and what the server can see.</p>
+      <div id="statusgrid"></div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px">
+        <button class="btn btn-ghost btn-sm" onclick="refreshStatus()">↻ Refresh</button>
+        <a class="btn btn-ghost btn-sm" href="/api/setup/schema">⬇ Download schema.sql</a>
+        <a class="btn btn-ghost btn-sm" href="/about.html">About this site →</a>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="step1">
+      <h2>Connection</h2>
+      <p class="sub">The same details MySQL Workbench or <span class="codechip">mysql -u root -p</span> would use.</p>
+      <div class="row2">
+        <div class="field"><label>Host</label><input type="text" id="f-host" value="127.0.0.1"></div>
+        <div class="field"><label>Port</label><input type="number" id="f-port" value="3306"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>User</label><input type="text" id="f-user" value="root"></div>
+        <div class="field"><label>Password</label><input type="password" id="f-pass" placeholder="blank = no password"></div>
+      </div>
+      <div class="field"><label>Database name (to be created)</label><input type="text" id="f-db" value="theplatescraper"></div>
+      <div class="banner warn" id="b-driver"></div>
+      <button class="btn btn-dark" id="btn-test" onclick="testConn()">🔌 Test connection</button>
+    </div>
+
+    <div class="panel hidden" id="step2">
+      <h2>Create database + schema</h2>
+      <p class="sub">Runs <span class="codechip">CREATE DATABASE IF NOT EXISTS</span> and the full <span class="codechip">data/schema.sql</span> — 11 tables for users, sessions, recipes, substitutions, affiliate stores/products/links/clicks, RSS feeds, rewritten posts, and meta. Nothing is dropped; existing tables are left untouched. On shared hosts (InMotion cPanel etc.) create the database in cPanel <em>first</em> (it may carry a cPanel-username prefix) and enter its exact name above — this step then simply applies the schema to it.</p>
+      <button class="btn btn-primary" id="btn-create" onclick="createDb()">🏗 Create database and apply schema</button>
+      <div class="banner ok" id="b-create"></div>
+    </div>
+
+    <div class="panel hidden" id="step3">
+      <h2>Migrate data</h2>
+      <p class="sub">Copies the whole JSON store — recipes, members, saved lists, affiliate stores &amp; click history, feeds, posts — into the tables you just created. Safe to re-run: tables are rebuilt from the JSON mirror, which is the source of truth for this step.</p>
+      <button class="btn btn-primary" id="btn-migrate" onclick="migrate()">📦 Migrate JSON → MySQL</button>
+      <div class="banner ok" id="b-migrate"></div>
+    </div>
+
+    <div class="panel hidden" id="step4">
+      <h2>Activate</h2>
+      <p class="sub">Flip the live store to MySQL. Every read/write now goes to the database, and the JSON file keeps mirroring every change as a hot backup. If the database is ever unreachable, the server falls back to JSON automatically so the site never goes dark.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <button class="btn btn-sage" onclick="activate()">✅ Activate MySQL store</button>
+        <button class="btn btn-ghost" onclick="deactivate()">↩ Fall back to JSON</button>
+      </div>
+      <div class="banner ok" id="b-activate"></div>
+    </div>
+
+    <div class="panel" style="margin-top:22px">
+      <h2>Prefer the terminal?</h2>
+      <p class="sub">The exact same wizard runs headless — this is what <span class="codechip">setup-theplatescraper.ps1</span> calls under the hood:</p>
+      <pre class="mono" style="background:var(--ink); color:#f4ecdd; padding:16px; border-radius:12px; overflow:auto; font-size:12.5px; line-height:1.7">python tools\mysql_setup.py --host 127.0.0.1 --user root --password *** --database theplatescraper --test
+python tools\mysql_setup.py --host 127.0.0.1 --user root --password *** --database theplatescraper --create
+python tools\mysql_setup.py --host 127.0.0.1 --user root --password *** --database theplatescraper --migrate
+python tools\mysql_setup.py --host 127.0.0.1 --user root --password *** --database theplatescraper --activate
+
+# or the whole ride in one shot (Windows):
+powershell -ExecutionPolicy Bypass -File .\setup-theplatescraper.ps1</pre>
+    </div>
+  </div>
+</main>
+<footer id="footer"></footer>
+<script src="/app.js"></script>
+<script>
+TNS.init("");
+let status = null;
+
+function conn() {
+  return { host: document.getElementById("f-host").value, port: document.getElementById("f-port").value,
+           user: document.getElementById("f-user").value, password: document.getElementById("f-pass").value,
+           database: document.getElementById("f-db").value };
+}
+function show(n, banner, msg, ok) {
+  banner.classList.add("show");
+  banner.className = "banner show " + (ok ? "ok" : "err");
+  banner.textContent = msg;
+}
+async function refreshStatus() {
+  try {
+    status = await TNS.api("setup/status");
+  } catch (e) { status = { driver: false, active: false, store: "json" }; }
+  const s = status;
+  document.getElementById("statusbar").innerHTML =
+    '<div class="pillrow"><span class="pill">Live store: <b>' + (s.store === "mysql" ? "🗄 MySQL" : "📄 JSON (data/db.json)") + "</b></span>" +
+    "<span class=\"pill\">pymysql driver: " + (s.driver ? "✅ installed" : "❌ not installed") + "</span>" +
+    (s.serverVersion ? "<span class=\"pill\">MySQL server: " + TNS.esc(s.serverVersion) + "</span>" : "") +
+    (s.config && s.config.host ? "<span class=\"pill\">Saved config: " + TNS.esc(s.config.host + ":" + s.config.port + " / " + s.config.database) + "</span>" : "") +
+    "</div>";
+  const rows = [
+    ["Driver (pymysql)", s.driver ? "Installed" : "Missing — run <b>pip install -r requirements.txt</b> or the .ps1 setup"],
+    ["Live store", s.store === "mysql" ? "MySQL (config: " + (s.config && s.config.database ? TNS.esc(s.config.database) : "") + ")" : "JSON file (data/db.json)"],
+    ["MySQL server", s.serverVersion ? "Reachable — " + TNS.esc(s.serverVersion) : (s.error ? "Not reachable: " + TNS.esc(s.error) : "No saved connection details yet")],
+    ["Tables found", (s.tables || []).length ? s.tables.map(t => "<span class='codechip'>" + t + "</span>").join(" ") : "—"],
+  ];
+  document.getElementById("statusgrid").innerHTML = rows.map(r =>
+    '<div style="display:grid;grid-template-columns:170px 1fr;gap:12px;padding:10px 0;border-top:1px dashed var(--line-soft);font-size:14.5px"><b>' + r[0] + "</b><span>" + r[1] + "</span></div>").join("");
+  document.getElementById("b-driver").textContent = s.driver ? "" : "Heads-up: the server can't talk to MySQL until pymysql is installed (pip install pymysql, or re-run setup-theplatescraper.ps1).";
+  document.getElementById("b-driver").classList.toggle("show", !s.driver);
+}
+async function testConn() {
+  const btn = document.getElementById("btn-test");
+  btn.disabled = true; btn.textContent = "Connecting…";
+  try {
+    const d = await TNS.api("setup/test", { body: conn() });
+    show(null, document.getElementById("b-create"), "Connected to MySQL " + d.version + ". You're clear to create.", true);
+    TNS.toast("Connection OK — MySQL " + d.version, "ok");
+  } catch (e) {
+    show(null, document.getElementById("b-create"), e.message, false);
+  }
+  btn.disabled = false; btn.textContent = "🔌 Test connection";
+}
+async function createDb() {
+  const btn = document.getElementById("btn-create");
+  btn.disabled = true; btn.textContent = "Creating…";
+  try {
+    const d = await TNS.api("setup/create", { body: conn() });
+    show(null, document.getElementById("b-create"), d.message + " (server " + d.version + ")", true);
+    TNS.toast("Database created", "ok");
+    setTimeout(() => goStep(3), 700);
+  } catch (e) { show(null, document.getElementById("b-create"), e.message, false); }
+  btn.disabled = false; btn.textContent = "🏗 Create database and apply schema";
+}
+async function migrate() {
+  const btn = document.getElementById("btn-migrate");
+  btn.disabled = true; btn.textContent = "Migrating…";
+  try {
+    const d = await TNS.api("setup/migrate", { body: conn() });
+    show(null, document.getElementById("b-migrate"), d.message, true);
+    TNS.toast("Data migrated", "ok");
+    setTimeout(() => goStep(4), 700);
+  } catch (e) { show(null, document.getElementById("b-migrate"), e.message, false); }
+  btn.disabled = false; btn.textContent = "📦 Migrate JSON → MySQL";
+}
+async function activate() {
+  try {
+    const d = await TNS.api("setup/activate", { body: conn() });
+    show(null, document.getElementById("b-activate"), d.message, true);
+    TNS.toast("MySQL is live 🗄", "ok");
+    refreshStatus();
+  } catch (e) { show(null, document.getElementById("b-activate"), e.message, false); }
+}
+async function deactivate() {
+  try {
+    const d = await TNS.api("setup/deactivate", { body: conn() });
+    show(null, document.getElementById("b-activate"), d.message, true);
+    refreshStatus();
+  } catch (e) { show(null, document.getElementById("b-activate"), e.message, false); }
+}
+function goStep(n) {
+  for (let i = 0; i < 5; i++) {
+    document.getElementById("step" + i).classList.toggle("hidden", i !== n);
+    document.querySelector('#steptabs button[data-s="' + i + '"]').classList.toggle("on", i === n);
+  }
+}
+document.getElementById("steptabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-s]");
+  if (b) goStep(+b.dataset.s);
+});
+refreshStatus();
+</script>
+</body>
+</html>

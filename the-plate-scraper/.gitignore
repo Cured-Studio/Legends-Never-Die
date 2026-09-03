@@ -1,0 +1,4 @@
+data/db.json
+data/mysql.json
+__pycache__/
+.venv/
