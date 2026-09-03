@@ -349,7 +349,7 @@ def seed_db() -> dict:
             "saved": [], "list": [], "scrapes": [], "custom": [], "listCursor": 1000,
         }
 
-    add_user("demo@theplatescraper.com", "Dana Cooks", "demo1234", "premium")
+    add_user("demo@theplatescraper.com", "Dana Cooks", "demo1234")
     add_user("admin@theplatescraper.com", "Site Owner", "plate-admin-2026", "legend")
     users["demo@theplatescraper.com"]["saved"] = ["one-pot-lemon-garlic-butter-chicken", "creamy-coconut-chickpea-curry"]
     users["demo@theplatescraper.com"]["scrapes"] = [
@@ -1546,7 +1546,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"ok": True, "items": u["list"]})
             return
 
-        # --- member profile / tier ---
+        # --- member profile ---
         if p == "profile" and method == "POST":
             with LOCK:
                 db = load_db()
@@ -1558,20 +1558,6 @@ class Handler(BaseHTTPRequestHandler):
                     u["name"] = name[:40]
                 save_db(db)
             self._json({"ok": True, "user": self._public_user(u)})
-            return
-
-        if p == "tier" and method == "POST":
-            tier = b.get("tier")
-            if tier not in ("premium", "legend"):
-                return self._json({"ok": False, "error": "Unknown tier."}, 400)
-            with LOCK:
-                db = load_db()
-                u = self._db_user(db)
-                if not u:
-                    return self._json({"ok": False, "error": "Sign in first."}, 401)
-                u["tier"] = tier  # simulated checkout
-                save_db(db)
-            self._json({"ok": True, "user": self._public_user(u), "note": "Demo checkout — no card was charged."})
             return
 
         # --- substitutions ---

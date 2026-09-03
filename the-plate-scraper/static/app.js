@@ -107,7 +107,7 @@
     const el = document.getElementById("footer");
     if (!el) return;
     el.innerHTML = '<div class="wrap"><div class="cols">' +
-      "<div><h4>The Plate Scraper</h4><p style='font-size:14px;color:var(--ink-soft);margin:0 0 10px'>An independent home-cooking platform for theplatescraper.com. Scrape the web's best recipes, swap what you have, and cook like a legend.</p>" +
+      "<div><h4>The Plate Scraper</h4><p style='font-size:14px;color:var(--ink-soft);margin:0 0 10px'>An independent recipe site for theplatescraper.com. Tested weeknight recipes, honest substitutions, and a shopping list that organizes itself. Free forever — powered by affiliate links.</p>" +
       '<div class="pillrow"><span class="pill">Est. 2026</span><span class="pill">Seattle, WA</span></div></div>' +
       "<div><h4>Cooking</h4><ul>" +
       '<li><a href="/substitutions.html">Substitution Guide</a></li><li><a href="/shopping.html">Shopping List</a></li>' +

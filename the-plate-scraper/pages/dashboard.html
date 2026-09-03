@@ -28,7 +28,6 @@ TNS.init("");
     list = (await TNS.api("list")).items;
     const p = await TNS.api("rss/posts"); posts = p.posts || [];
   } catch (e) {}
-  const tierLabel = { free: "Free", premium: "Premium", legend: "Legend" }[me.tier];
   const initials = me.name.split(" ").map(x => x[0]).join("").slice(0, 2).toUpperCase();
   main.innerHTML =
     '<h1 style="font-size:34px; margin:0 0 4px">My Kitchen</h1>' +
@@ -37,7 +36,7 @@ TNS.init("");
     '<div class="profile-card"><div class="avatar">' + initials + "</div>" +
     "<b style='font-size:18px'>" + TNS.esc(me.name) + "</b>" +
     '<div style="font-size:13px; color:var(--ink-faint); margin:2px 0 10px">' + TNS.esc(me.email) + "</div>" +
-    '<span class="tierbadge ' + me.tier + '">' + tierLabel + "</span>" +
+    '<span class="tierbadge">Member · free forever</span>' +
     '<div class="ministats">' +
     '<div class="ms"><b>' + saved.length + "</b><span>saved</span></div>" +
     '<div class="ms"><b>' + list.filter(i => !i.purchased).length + "</b><span>to buy</span></div>" +
@@ -50,12 +49,8 @@ TNS.init("");
     '<a class="btn btn-ghost btn-sm" href="/feedroom.html">📡 Feed Room</a>' +
     '<a class="btn btn-ghost btn-sm" href="/setup.html">🗄 MySQL Wizard</a>' : "") +
     '<button class="btn btn-ghost btn-sm" id="b-out">Sign out</button></div></div>' +
-    '<div class="sidebox" style="margin-top:16px"><h3>Membership</h3>' +
-    '<div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:12px">You\'re on <b>' + tierLabel + "</b>." +
-    (me.tier === "free" ? " Unlock syncing and your full library." : me.tier === "premium" ? " One step from the whole arsenal." : " The top shelf. Enjoy.") + "</div>" +
-    (me.tier !== "premium" ? '<button class="btn btn-primary btn-sm" data-tier="premium" id="b-pre">⚡ Upgrade to Premium — $9/mo</button>' : "") +
-    (me.tier !== "legend" ? '<button class="btn btn-dark btn-sm" data-tier="legend" id="b-leg" style="margin-top:8px">👑 Go Legend — $19/mo</button>' : "") +
-    "<p style='font-size:11.5px; color:var(--ink-faint); margin:10px 0 0'>Demo checkout — no card charged.</p></div>" +
+    '<div class="sidebox" style="margin-top:16px"><h3>Your membership</h3>' +
+    "<div style='font-size:13.5px; color:var(--ink-soft)'>Everything is unlocked — <b>free forever</b>. The site is powered by affiliate links in the gear shelf, not members.</div></div>" +
     "</div><div>" +
     (me.is_admin ? '<div class="panel" style="margin-bottom:20px"><h2 style="font-size:20px; margin-bottom:12px">📡 Rewritten posts (Feed Room)</h2>' +
     (posts.length ? posts.map(p => '<div class="recents"><div class="r"><span>' + TNS.esc(p.title) + '</span><span class="d">' +
@@ -79,17 +74,6 @@ TNS.init("");
       TNS.me = d.user; TNS.toast("Profile updated", "ok");
     } catch (e) { TNS.toast(e.message, "err"); }
   };
-  ["b-pre", "b-leg"].forEach(id => {
-    const b = document.getElementById(id);
-    if (b) b.onclick = async () => {
-      try {
-        const d = await TNS.api("tier", { body: { tier: b.dataset.tier } });
-        TNS.me = d.user;
-        TNS.toast(d.note + " Welcome to " + b.dataset.tier.toUpperCase() + " 🎉", "ok");
-        setTimeout(() => location.reload(), 900);
-      } catch (e) { TNS.toast(e.message, "err"); }
-    };
-  });
 })();
 </script>
 </body>
