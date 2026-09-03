@@ -80,3 +80,13 @@ match has someone's dev-strike, and you never have to actually hit anything.
   Record one casual match with "record last 5 min" ON to bank these.
 - twitch clip titles stay `01a`-style; spectate clips can be `02x-<moment>`
   since section mapping happens at intake (boom map + contact sheets sort them)
+
+## CAPTURE LOOP v2: xbox spectate-stream → laptop clips (agreed)
+Xbox broadcasts the spectate session to twitch; laptop watches the own
+channel live and makes the clips. No xbox capture manager, no upload dance.
+- BEFORE first session: enable **store past broadcasts** (backup VOD of the
+  whole session = clip leisurely afterward) + set xbox twitch app to max quality
+- clips made on your own stream = zero rights drama, instant
+- github relay straight from the laptop browser: keep clips **≤30s @1080p or
+  ≤60s @720p** → stays under the 25MB web-upload cap, no git needed
+- bigger cuts still route through the inmotion box (haul.py/yt-dlp)
