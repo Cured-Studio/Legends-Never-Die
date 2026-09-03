@@ -64,3 +64,19 @@ planes come home while the song fades. Open with a launch, close with a landing.
 - tip: friendly carriers launch at match start — park near one during the first
   20s of a match; returning planes show late-game. One match in a carrier
   yourself = unlimited deck angles.
+
+## CAPTURE STRATEGY PIVOT: spectate, don't perform (agreed)
+User will farm footage by **spectating matches**, not recording own playthroughs.
+Why it's right: camera goes where the action is, no HUD of your own, every
+match has someone's dev-strike, and you never have to actually hit anything.
+
+- **how:** get sunk early (tier III yolo = fast ticket to spectator mode),
+  then you're a camera operator for the rest of the match — cycle players,
+  follow the carrier for launches, the DDs for torp spreads
+- **gold mines:** carrier players at match start (guaranteed launch b-roll),
+  destroyers in torpedo lanes, last-two-ships duels, match-end battle results
+- **POV-only moments that still need ONE played session:** waypoint click on
+  tactical map (01a), minimap glance (05), consumables/smoke from own deck.
+  Record one casual match with "record last 5 min" ON to bank these.
+- twitch clip titles stay `01a`-style; spectate clips can be `02x-<moment>`
+  since section mapping happens at intake (boom map + contact sheets sort them)
