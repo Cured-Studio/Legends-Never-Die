@@ -3,6 +3,7 @@
 
 Run:  python3 server.py  [port]
 """
+import base64
 import hashlib
 import html as htmllib
 import json
@@ -297,6 +298,29 @@ def strip_tags(s: str) -> str:
     s = re.sub(r"[ \t\xa0]+", " ", s)
     s = re.sub(r"\n\s*\n+", "\n", s)
     return s.strip()
+
+
+def store_image(data_url: str, slug_hint: str):
+    """Save a data-URL image to static/uploads and return its public path."""
+    if not data_url.startswith("data:image/"):
+        return None
+    try:
+        head, b64 = data_url.split(",", 1)
+        mime = head.split(";")[0].split(":")[1]
+        ext = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}.get(mime)
+        if not ext:
+            return None
+        raw = base64.b64decode(b64)
+        if not raw or len(raw) > 5_000_000:
+            return None
+        up = os.path.join(STATIC, "uploads")
+        os.makedirs(up, exist_ok=True)
+        fname = slugify(slug_hint or "image")[:60] + "-" + secrets.token_hex(3) + ext
+        with open(os.path.join(up, fname), "wb") as f:
+            f.write(raw)
+        return "/uploads/" + fname
+    except Exception:
+        return None
 
 
 def unique_slug(db: dict, base: str) -> str:
@@ -1106,13 +1130,15 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith("/api/"):
             return self._api(method, path, q)
 
-        if path.startswith("/static/") or path in ("/style.css", "/app.js") or path.startswith("/images/"):
+        if path.startswith("/static/") or path in ("/style.css", "/app.js") or path.startswith("/images/") or path.startswith("/uploads/"):
             if path in ("/style.css", "/app.js"):
                 return self._serve_static(os.path.join(STATIC, path.lstrip("/")))
             if path.startswith("/static/"):
                 return self._serve_static(os.path.join(STATIC, path[len("/static/"):]))
             if path.startswith("/images/"):
                 return self._serve_static(os.path.join(STATIC, "images", path[len("/images/"):]))
+            if path.startswith("/uploads/"):
+                return self._serve_static(os.path.join(STATIC, "uploads", os.path.basename(path)))
         # HTML pages at root
         if path.endswith(".html"):
             return self._serve_static(os.path.join(PAGES, path.lstrip("/")))
@@ -1282,6 +1308,24 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"ok": True, "saved": saved})
             return
 
+        m = re.fullmatch(r"recipes/([a-z0-9-]+)/image", p)
+        if m and method == "POST":
+            if not self._is_owner():
+                return self._json({"ok": False, "error": "Owner only — that's a back-office tool."}, 401)
+            slug = m.group(1)
+            url = store_image(b.get("image") or "", slug)
+            if not url:
+                return self._json({"ok": False, "error": "That file doesn't look like an image (JPG, PNG, or WebP, up to 5 MB)."}, 400)
+            with LOCK:
+                db = load_db()
+                rec = db["recipes"].get(slug)
+                if not rec:
+                    return self._404()
+                rec["image"] = url
+                save_db(db)
+            self._json({"ok": True, "image": url})
+            return
+
         m = re.fullmatch(r"recipes/([a-z0-9-]+)", p)
         if m and method == "GET":
             slug = m.group(1)
@@ -1389,9 +1433,10 @@ class Handler(BaseHTTPRequestHandler):
                     low = p["item"].lower()
                     p["aisle"] = next((a for k, a in aisle_map.items() if k in low), "pantry")
                 slug = unique_slug(db, title)
+                image_url = store_image(b.get("image") or "", title) if b.get("image") else None
                 rec = {
                     "slug": slug, "title": title, "category": b.get("category") or "Dinner",
-                    "image": None, "time": b.get("cookTime") or 30, "servings": b.get("servings") or 4,
+                    "image": image_url, "time": b.get("cookTime") or 30, "servings": b.get("servings") or 4,
                     "difficulty": b.get("difficulty") or "Easy", "rating": 0, "reviews": 0,
                     "description": (b.get("notes") or "Saved with the Plate Scraper from " + (b.get("source") or "the web"))[:240],
                     "tags": ["scraped"], "source": b.get("source") or "", "url": b.get("url") or "",

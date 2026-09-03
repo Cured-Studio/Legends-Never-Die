@@ -212,6 +212,13 @@
     } catch (e) { TNS.toast("Couldn't track that link.", "err"); }
   };
 
+  TNS.readImage = function (file, cb, maxMB) {
+    if (file.size > (maxMB || 5) * 1024 * 1024) { TNS.toast("Keep photos under 5 MB.", "err"); return; }
+    const r = new FileReader();
+    r.onload = () => cb(r.result);
+    r.readAsDataURL(file);
+  };
+
   /* ---------- recipe cards ---------- */
   TNS.recipeCard = function (r) {
     const img = r.image

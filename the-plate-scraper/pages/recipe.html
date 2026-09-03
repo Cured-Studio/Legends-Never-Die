@@ -63,7 +63,9 @@ function render() {
     '<button class="btn btn-sage" id="listbtn">🛒 Add all to shopping list</button>' +
     '<a class="btn btn-ghost" id="printbtn" href="javascript:window.print()">🖨 Print card</a>' +
     "</div></div>" +
-    '<div class="img">' + (R.image ? '<img src="' + R.image + '" alt="' + TNS.esc(R.title) + '">' : '<div class="noimg" style="height:100%">🍲</div>') + "</div></div>" +
+    '<div class="img" id="heroimg">' + (R.image ? '<img src="' + R.image + '" alt="' + TNS.esc(R.title) + '">' : '<div class="noimg" style="height:100%">🍲</div>') + "</div>" +
+    (TNS.owner ? '<div style="margin-top:10px"><label class="btn btn-ghost btn-sm" for="chimg">📷 Change photo</label>' +
+    '<input type="file" id="chimg" accept="image/jpeg,image/png,image/webp" class="hidden"></div>' : "") + "</div>" +
     '<div class="recipe-cols">' +
     '<div class="ing-panel"><h2>Ingredients</h2><div class="hint">Quantities scale with the servings above. “swap ↗” jumps to a ratio in the Substitution Guide.</div>' +
     '<ul class="ing-list" id="inglist">' + ings + "</ul>" +
@@ -109,10 +111,23 @@ function render() {
 
 (async () => {
   try {
+    await TNS.isOwner();
     const d = await TNS.api("recipes/" + slug);
     R = d.recipe; GEAR = d.gear; SUBS = d.substitutions || {};
     R.savedByMe = d.savedByMe;
     render();
+    const ch = document.getElementById("chimg");
+    if (ch) ch.addEventListener("change", e => {
+      if (!e.target.files || !e.target.files[0]) return;
+      TNS.readImage(e.target.files[0], async data => {
+        try {
+          const d2 = await TNS.api("recipes/" + slug + "/image", { body: { image: data } });
+          R.image = d2.image;
+          document.getElementById("heroimg").innerHTML = '<img src="' + R.image + '" alt="' + TNS.esc(R.title) + '">';
+          TNS.toast("Photo updated 📷", "ok");
+        } catch (err) { TNS.toast(err.message, "err"); }
+      });
+    });
   } catch (e) {
     document.getElementById("detail").innerHTML =
       '<div class="empty-plate"><div class="big">🍽</div><p>' + TNS.esc(e.message) + '</p><a class="btn btn-primary" href="/recipes.html">Back to the library</a></div>';

@@ -120,6 +120,17 @@ static/app.js              # shared frontend (nav, api client, shopping list, tr
 static/images/             # generated food photography
 ```
 
+## Rebranding & look (no code skills needed)
+
+| What | Where |
+|---|---|
+| **Colors** | `static/style.css`, the `:root` block at the top — `--terra`, `--sage`, `--gold`, `--bg`, `--ink`, … Change a few variables and the whole site re-themes. |
+| **Fonts** | Same `:root` block: `--serif` (headings) and `--sans` (body). For web fonts, add a `<link>` to Google Fonts in the `<head>` of the pages and update the two variables. |
+| **Logo mark (nav)** | `static/app.js` → `renderNav`, the inline SVG inside `<span class="mark">…</span>`. Swap the SVG for an `<img src="/images/logo.png">` to use a logo file. |
+| **Favicon** | The `link rel="icon"` data-URI in each page's `<head>` (all 13 pages) — or point them at `/images/favicon.png`. |
+| **Site name / tagline** | `static/app.js` → `renderNav` (brand text) and `renderFooter` (footer intro). |
+| **Recipe photos** | Every recipe has an image slot. Owner only: on any recipe page hit **📷 Change photo**, or attach a photo while saving in the Scraper. JPG/PNG/WebP up to 5 MB; stored in `static/uploads/`, served at `/uploads/…`. Recipes without a photo show a warm placeholder. |
+
 ## Notes
 
 - The preview sandbox has no outbound network: URL scraping and RSS fetching run the identical
