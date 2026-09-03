@@ -42,3 +42,25 @@ each, with 1–2s of padding**, and the edit stacks them on the beat.
 | file | landed | duration | res/fps | verdict |
 |---|---|---|---|---|
 | *(waiting on first clip)* | | | | |
+
+## Section 01 storyboard — "Droppin' the carrier" (agreed w/ user)
+| time | visual | beat note |
+|---|---|---|
+| 0:00–0:08 | ocean establishing / fleet at speed, **title card in** (song title + plaguedrgen) | intro bars |
+| 0:08–0:16 | carrier in frame / deck activity, engines spooling | build |
+| 0:16–0:24 | **takeoff angle A** → **takeoff angle B** | cut each on a bar (~2.5s) |
+| 0:24–0:30 | planes forming up over the fleet | tension hold |
+| **0:30** | 💥 biggest launch shot lands ON the downbeat = "Droppin' the carrier" | hard cut |
+| ~0:34 | **waypoint click on tactical map** = "new mission acquired" (click lands on the word) | literal sync |
+| ~0:38 | salvo toward a battleship = "Takin' out battleships" | bridges into section 02 |
+
+**Bookend:** returning/landing planes are saved for the 2:00–2:11 outro —
+planes come home while the song fades. Open with a launch, close with a landing.
+
+### Moments to capture for 01
+- `01a map-waypoint` (~8s: map open → cursor → click → waypoint line appears)
+- `01b takeoff-wide` (~4s) · `01c takeoff-angle2` (~4s) · `01d formup-flyover` (~5s)
+- `01e planes-returning` (~6s) → **bank for the outro (07)**
+- tip: friendly carriers launch at match start — park near one during the first
+  20s of a match; returning planes show late-game. One match in a carrier
+  yourself = unlimited deck angles.
